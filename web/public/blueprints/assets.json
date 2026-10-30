@@ -38,5 +38,8 @@
         "why": "the heritage dataset has no group Oddjob: the Special view level got the rules [6,3,8,], invalid JSON, and the administrator menu disappeared"
       }
     ]
+  },
+  "jcb/pkg_component_builder.zip": {
+    "url": "https://github.com/joomengine/pkg-component-builder/archive/refs/tags/v6.2.0.zip"
   }
 }
