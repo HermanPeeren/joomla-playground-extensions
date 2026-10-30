@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "title": "Joomla Component Builder",
+    "description": "Joomla with Joomla Component Builder (joomengine/pkg-component-builder) installed: design and compile Joomla components in the browser.",
+    "author": "Joomla Playground",
+    "prebuild": true
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/administrator/index.php?option=com_componentbuilder",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/jcb/pkg_component_builder.zip"
+    }
+  ]
+}
