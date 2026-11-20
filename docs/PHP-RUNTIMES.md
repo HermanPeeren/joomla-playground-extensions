@@ -4,6 +4,45 @@
 ([joomengine/php-wasm](https://github.com/joomengine/php-wasm),
 [joomengine/mariadb-wasm-bridge](https://github.com/joomengine/mariadb-wasm-bridge)).*
 
+## Update, 20 November 2026
+
+What is below was right on 28 October, but one candidate has changed since:
+
+- **JoomEngine now has 64-bit integers.** On 31 October Llewellyn started
+  [joomengine/php-wasm-int64](https://github.com/joomengine/php-wasm-int64) (Apache-2.0): Sean Morris's php-wasm 0.2.0
+  with JoomEngine's own patches, released as archives on GitHub (v0.0.1 on 1 November, v0.0.4 on 20 November), not
+  on npm. It has PHP 8.3.37, 8.4.28 and 8.5.13, Emscripten 6.0.6, and CGI, CLI and phpdbg builds of each.
+  Sean Morris's own php-wasm is still 32-bit (0.2.0 is the latest release; his issue #44 about it is open), and so
+  is joomengine/php-wasm 0.1.0 from the table below.
+- **Both 64-bit runtimes are wasm32: 32-bit pointers, 64-bit PHP integers.** Neither uses Memory64 (wasm64). They
+  switch it on differently:
+  - `@php-wasm` compiles everything with `-D__x86_64__`, so PHP's `Zend/zend_long.h` selects
+    `ZEND_ENABLE_ZVAL_LONG64`, and patches out the x86 inline assembly that the same macro switches on
+    (`packages/php-wasm/compile/php/Dockerfile`, "64 bit long support"; since v1.0.28, 5 March 2025). libwebp and
+    OpenSSL are built without it. Extensions compiled elsewhere need the same flags
+    ([#4377](https://github.com/WordPress/wordpress-playground/issues/4377)).
+  - php-wasm-int64 defines its own `ZEND_WASM_INT64` and patches `zend_long.h` to select 64-bit integers only on
+    wasm32 Emscripten. Its stated rule is that "the patchset must not pretend that the target CPU is x86-64". It adds
+    range checks wherever a 64-bit integer is narrowed to the 32-bit `size_t` (strings, streams, random, mbstring,
+    ZIP, OpenSSL, SQLite, Intl), and tags its builds `wasm32-int64`, so a 32-bit extension cannot be loaded by
+    mistake. That is more work per PHP release, and more careful.
+- **Checked in the browser on 20 November** (phpinfo of both live sites, PHP 8.4):
+  - playground.joomengine.org: PHP 8.4.27, Emscripten 6.0.6, `wasm32`, build `API20240924, NTS, wasm32-int64`,
+    CGI;
+  - this playground: PHP 8.4.25, Emscripten 4.0.19, `wasm32`, `PHP WASM SAPI (JSPI)`.
+- **What 64-bit integers fix** for both: Composer's `php-64bit` requirement (JCB's PhpSpreadsheet with ZipStream 3:
+  JoomEngine has dropped its 32-bit rebuild of it, and this playground never needed one), timestamps after 2038,
+  IDs above 2,147,483,647, file sizes above 2 GB, `pack()`/`unpack()` with 64-bit formats.
+
+The conclusion stays **keep `@php-wasm`**: the integers were one of five reasons, and the others (speed, PHP patch
+releases, outgoing HTTP, the filesystem journal, the request handler) still hold. The int64 builds use Sean's
+`MAIN_MODULE` and Asyncify build, which the speed measurements below found to be about twice as slow, and they
+are not published as npm packages. JoomEngine has meanwhile added its own HTTP transport and request handling, but
+on its own runtime.
+
+What JoomEngine built on top of the runtime (an editor, PHP debugging, Adminer, a version catalog, agent guides,
+a desktop app) is compared with this playground and with WordPress Playground in [JOOMENGINE.md](JOOMENGINE.md).
+
 ## Question
 
 The playground runs PHP with `@php-wasm` 3.1.60 from WordPress Playground. Would
