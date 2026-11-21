@@ -99,7 +99,15 @@ through Joomla's own model, shows the front end page in the tab, and exports the
 - **Package:** not on npm yet; it runs from a checkout. The name is still open.
 - **Documentation:** [MCP.md](MCP.md), and the comparison with WordPress in [WORDPRESS-MCP.md](WORDPRESS-MCP.md).
 - **The "done when" check:** the end-to-end tests in Chrome (`mcp/test/browser.test.mjs`) cover files, requests,
-  the console and showing a page. The full Weblinks run in a real Claude Code session has not been done yet.
+  the console and showing a page. On 21 November, a script did the Weblinks check through the MCP server, against
+  a local build in Chrome:
+  - it installed Weblinks with `joomla_write_file` and `joomla_cli`
+  - it added a link through `WeblinkModel` with `joomla_run_php`
+  - it showed the category, with the link, through `joomla_show_page`
+
+  That run found two bugs, which are now fixed: the console missed `JOOMLA_MINIMUM_PHP`, and the skill's PHP
+  bootstrap missed `defines.php`. Exporting is still the user's **Export** button. A run by a real assistant
+  (Claude Code) is still to do.
 
 ## 3. The code editor
 
