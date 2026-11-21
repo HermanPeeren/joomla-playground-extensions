@@ -9,6 +9,9 @@ an idea, show something to someone, and throw it away, or keep it in your browse
 > Joomla itself, such as Joomla Component Builder. It is not an official Joomla project. It follows
 > [joomla-projects/joomla-playground](https://github.com/joomla-projects/joomla-playground) and adds blueprints.
 > Open it: <https://hermanpeeren.github.io/joomla-playground-extensions/>
+>
+> An AI assistant can work on a playground site through the MCP server in [mcp/](mcp/README.md) (files, search,
+> PHP, requests, Joomla's console), with the guide in [skills/joomla-playground](skills/joomla-playground/SKILL.md).
 
 After a few seconds you see Joomla's administrator, already logged in as a Super User. Everything runs in your
 browser: PHP is compiled to WebAssembly, and the site and its database live in the tab's memory. Nothing is

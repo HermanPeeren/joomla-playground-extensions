@@ -7,6 +7,7 @@
 import { deleteSite, freeSlug, isSiteOpen, listSites, readMeta, renameSite } from './storage.js';
 import { PHP_VERSIONS, blueprintFromUrl } from './blueprint.js';
 import { parseMail } from './mail.js';
+import { allowedPort, connectAssistant, registerWebMcpTools } from './mcp-bridge.js';
 
 const base = new URL('./', location.href);
 
@@ -32,6 +33,7 @@ const elements = {
   sitesMenu: document.querySelector('#sites-menu'),
   sitesList: document.querySelector('#sites-list'),
   credentials: document.querySelector('#credentials'),
+  assistant: document.querySelector('#assistant'),
   info: document.querySelector('#info'),
   mail: document.querySelector('#mail'),
   mailCount: document.querySelector('#mail-count'),
@@ -55,6 +57,8 @@ let backgroundStatus = null;
 /** The Joomla bundles of this playground: { default: '6.2.0', versions: [manifest, ...] } (joomla/versions.json). */
 let bundles = null;
 const pending = new Map();
+/** The connection to an AI assistant, if any (see setUpAssistant()). */
+let assistant = null;
 let nextId = 1;
 
 /** The mails the running playground sent, newest first. */
@@ -181,6 +185,9 @@ function show(path = '/administrator/') {
       elements.frame.src = `${playground.siteUrl}${path}`;
     })
     .catch((error) => setStatus(`The service worker did not start: ${error.message}`, true));
+
+  // A new playground (another site, Joomla or PHP version): the assistant hears of it.
+  assistant?.hello();
 
   // For tests and debugging; the export for scripts/build-demos.mjs.
   window.joomlaPlayground = playground;
@@ -529,6 +536,8 @@ async function start() {
     renderMails();
   };
 
+  setUpAssistant();
+
   // A saved site writes its changes shortly after requests; when the tab is hidden or closed, write them now.
   const flush = () => playground?.site && call('flush').catch(() => {});
 
@@ -567,6 +576,48 @@ async function start() {
   if (site && url.searchParams.has('php')) {
     history.replaceState(null, '', `?site=${encodeURIComponent(site)}`);
   }
+}
+
+/**
+ * The connection to an AI assistant (see mcp-bridge.js and mcp/): to its MCP server on this computer when the
+ * playground was opened with ?mcp-port and the user allowed it, and through WebMCP where the browser has it.
+ */
+function setUpAssistant() {
+  const context = {
+    playground: () => playground,
+    call,
+    // After the service worker is ready, like show(): the frame's first page must not replace this one.
+    showUrl: (url) =>
+      serviceWorkerReady.then(() => {
+        elements.frame.src = url;
+      }),
+    onState: (state) => {
+      const labels = {
+        waiting: ['AI assistant: waiting', 'Waiting for the MCP server of the assistant on this computer; click to disconnect'],
+        connected: ['AI assistant ●', 'An AI assistant works on this site; click to disconnect'],
+        replaced: ['AI assistant: in another tab', 'The assistant connected to another playground tab'],
+      };
+
+      elements.assistant.hidden = !labels[state];
+      [elements.assistant.textContent, elements.assistant.title] = labels[state] ?? ['', ''];
+      elements.assistant.dataset.state = state;
+    },
+  };
+  const port = allowedPort();
+
+  if (port) {
+    assistant = connectAssistant(port, context);
+    elements.assistant.onclick = () => {
+      if (elements.assistant.dataset.state === 'replaced') {
+        elements.assistant.hidden = true;
+      } else if (confirm('Disconnect the AI assistant from this playground?')) {
+        assistant.stop();
+        assistant = null;
+      }
+    };
+  }
+
+  registerWebMcpTools(context).catch((error) => console.warn('WebMCP: the tools could not be registered', error));
 }
 
 start().catch((error) => {
