@@ -59,7 +59,7 @@ export function allowedPort(url = new URL(location.href)) {
  * @param {object} context
  * @param {() => object|null} context.playground The running playground (null while it starts)
  * @param {(type: string, payload: object) => Promise<any>} context.call Sends an action to the PHP worker
- * @param {(url: string) => void} context.showUrl Shows a URL of the site in the playground's frame
+ * @param {(url: string) => Promise<void>|void} context.showUrl Shows a URL of the site in the playground's frame
  */
 export async function runTool(name, args, { playground, call, showUrl }) {
   const tool = TOOLS_BY_NAME.get(name);
@@ -81,7 +81,7 @@ export async function runTool(name, args, { playground, call, showUrl }) {
       throw Object.assign(new Error('The path starts with a single "/".'), { code: 'INVALID_ARGUMENT' });
     }
 
-    showUrl(`${current.siteUrl}${path}`);
+    await showUrl(`${current.siteUrl}${path}`);
 
     return { shown: path };
   }

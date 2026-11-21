@@ -586,9 +586,11 @@ function setUpAssistant() {
   const context = {
     playground: () => playground,
     call,
-    showUrl: (url) => {
-      elements.frame.src = url;
-    },
+    // After the service worker is ready, like show(): the frame's first page must not replace this one.
+    showUrl: (url) =>
+      serviceWorkerReady.then(() => {
+        elements.frame.src = url;
+      }),
     onState: (state) => {
       const labels = {
         waiting: ['AI assistant: waiting', 'Waiting for the MCP server of the assistant on this computer; click to disconnect'],
