@@ -10,8 +10,7 @@ an idea, show something to someone, and throw it away, or keep it in your browse
 > [joomla-projects/joomla-playground](https://github.com/joomla-projects/joomla-playground) and adds blueprints.
 > Open it: <https://hermanpeeren.github.io/joomla-playground-extensions/>
 >
-> An AI assistant can work on a playground site through the MCP server in [mcp/](mcp/README.md) (files, search,
-> PHP, requests, Joomla's console), with the guide in [skills/joomla-playground](skills/joomla-playground/SKILL.md).
+> An AI assistant can work on a playground site: see [An AI assistant in the playground](#an-ai-assistant-in-the-playground-mcp).
 
 After a few seconds you see Joomla's administrator, already logged in as a Super User. Everything runs in your
 browser: PHP is compiled to WebAssembly, and the site and its database live in the tab's memory. Nothing is
@@ -191,6 +190,39 @@ You need PHP 8.3 or newer with `pdo_sqlite`.
 Optionally, remove the playground's certificate from
 `libraries/vendor/composer/ca-bundle/res/cacert.pem`: the block between the two "Joomla Playground CA" lines.
 Its private key is gone, so it does no harm, and the next Joomla update replaces the file anyway.
+
+## An AI assistant in the playground (MCP)
+
+*In this fork only.* An AI assistant on your computer can work on the site in your playground tab. This works
+with Claude Code, Claude Desktop, Codex, Gemini CLI or another MCP client. The assistant can:
+
+- read, search and change the site's files
+- run PHP code and Joomla's console
+- send requests to the site
+- show you the page it changed
+
+```
+AI assistant ──stdio──▶ MCP server (mcp/) ◀──WebSocket on 127.0.0.1── playground tab
+```
+
+1. **Install the server** from a checkout. It is not on npm yet, and it needs Node.js 20 or later:
+
+   ```sh
+   git clone https://github.com/HermanPeeren/joomla-playground-extensions.git
+   cd joomla-playground-extensions/mcp && npm ci
+   claude mcp add --transport stdio --scope user joomla-playground -- node "$PWD/server.mjs"
+   ```
+
+2. **Ask your assistant**, for example: "Open the Joomla Playground and show the reading time under every article
+   title".
+3. **Open the link it gives you** (`…?mcp-port=5480`) in Chrome, Edge or Firefox. Allow the connection, and in
+   Chrome or Edge also the permission to reach apps on your device. The toolbar then shows **AI assistant ●**.
+
+**More:**
+- [docs/MCP.md](docs/MCP.md): the story, an example, what it is good for, and the way from playground to a real
+  site
+- [mcp/README.md](mcp/README.md): other assistants, the tools, options and security
+- [skills/joomla-playground](skills/joomla-playground/SKILL.md): the guide for the assistant itself
 
 ## Running your own copy
 
