@@ -51,16 +51,47 @@ in the middle of a task.
     `user:add`, `site:down` and `site:up`, `scheduler:list` and `scheduler:run`, `database:export`.
 - **Installing an extension:** write the zip with `joomla_write_file` (`base64`) under `tmp/`, then run
   `["extension:install", "--path=tmp/<file>.zip"]`.
-- **PHP code:** `joomla_run_php` runs code in the site's root. For Joomla's API, bootstrap it first:
+- **PHP code:** `joomla_run_php` runs code in the site's root. For Joomla's API, bootstrap it first, like
+  Joomla's own `index.php`. Include `defines.php` first: it registers the playground's database driver.
+  Without it, every query fails with "Unable to load Database Driver: mysqlonsqlite".
 
   ```php
   define('_JEXEC', 1);
   define('JPATH_BASE', getcwd());
+  require 'defines.php';
   require 'includes/defines.php';
   require 'includes/framework.php';
   $db = \Joomla\CMS\Factory::getContainer()->get(\Joomla\Database\DatabaseInterface::class);
   echo json_encode($db->setQuery('SELECT id, title FROM #__content LIMIT 5')->loadObjectList());
   ```
+
+  To use an extension's MVC classes (models, tables), start the administrator application, as
+  `administrator/index.php` does: its session, the Super User, and the namespaces of the installed extensions.
+
+  ```php
+  define('_JEXEC', 1);
+  define('JPATH_BASE', getcwd() . '/administrator');
+  require JPATH_BASE . '/defines.php';
+  require JPATH_BASE . '/includes/defines.php';
+  require JPATH_BASE . '/includes/framework.php';
+  $container = \Joomla\CMS\Factory::getContainer();
+  foreach (['session.web', 'session', 'JSession', \Joomla\CMS\Session\Session::class, \Joomla\Session\Session::class, \Joomla\Session\SessionInterface::class] as $alias) {
+      $container->alias($alias, 'session.web.administrator');
+  }
+  $app = $container->get(\Joomla\CMS\Application\AdministratorApplication::class);
+  \Joomla\CMS\Factory::$application = $app;
+  $app->createExtensionNamespaceMap();
+  $app->loadIdentity(\Joomla\CMS\User\User::getInstance('admin'));
+  $model = $app->bootComponent('com_weblinks')->getMVCFactory()
+      ->createModel('Weblink', 'Administrator', ['ignore_request' => true]);
+  $saved = $model->save(['title' => 'Joomla Manual', 'url' => 'https://manual.joomla.org/', 'description' => '',
+      'catid' => 8, 'state' => 1, 'language' => '*', 'access' => 1]);
+  echo json_encode(['saved' => $saved, 'id' => $model->getState('weblink.id'), 'errors' => $model->getErrors()]);
+  ```
+
+  The `catid` 8 is Weblinks' "Uncategorised" category in a fresh playground: look up the real one first. A model
+  saves only what you give it. Give a value for every column that is `NOT NULL` without a default (here
+  `description`); the form would otherwise fill those in.
 
   Keep the output small: select fields, use `LIMIT`, and print JSON.
 - **Requests:** `joomla_request` sends a request as the playground's own session, logged in to the administrator.
