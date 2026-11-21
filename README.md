@@ -33,6 +33,15 @@ sent to a server.
 - **Weblinks:** <https://joomla-projects.github.io/joomla-playground/?blueprint=weblinks>. Joomla with
   [Weblinks](https://github.com/joomla-extensions/weblinks) installed, the component for a directory of links that
   used to be part of Joomla. It opens on its list in the administrator.
+- **Component tutorial, step 1** (this fork):
+  <https://hermanpeeren.github.io/joomla-playground-extensions/?blueprint=component-tutorial-step01>.
+  - **What it is:** Joomla with `com_example` as it is after
+    [step 1](https://manual.joomla.org/docs/building-extensions/components/component-development-tutorial/step01-basic-component/)
+    of the Joomla Manual's Component Development Tutorial, built from
+    [joomla/manual-examples](https://github.com/joomla/manual-examples/tree/main/component-tutorial).
+  - **What you see:** it opens the component's page on the site, which shows "The Eiffel Tower".
+  - **What to try:** the code is in `components/com_example`. Change it with an AI assistant (see
+    [below](#an-ai-assistant-in-the-playground-mcp)) and reload to see the result.
 - **Guided tours of the User Guide:** tutorials of the [Joomla User Guide](https://guide.joomla.org/tutorials) as
   guided tours. Each link opens a playground in the language of the tour, and the tour starts by itself. The tour
   shows the way to each page through the menu, and waits for you to do each step. All 34 tutorials of chapters 2 to 12,
