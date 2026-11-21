@@ -27,6 +27,8 @@ order that gives most for least, without making the start slower or the hosting 
 The fork is 31 commits behind: guided tours, working inside an iframe, `@php-wasm` 3.1.62. Merge `upstream/main`
 into the fork's `main`, rebuild, check `?blueprint=jcb` (fresh and prebuilt), deploy.
 
+**Built** (21 November, fork PR #2).
+
 ## 1. A site API in the worker (foundation for steps 2 and 3)
 
 New worker actions, in the existing queue:
@@ -47,6 +49,13 @@ New worker actions, in the existing queue:
 - Saved sites keep the changes through the existing journal; temporary playgrounds stay temporary.
 - Tests in Node (`@php-wasm/node`), like the existing integration tests: confinement, revisions, rename and delete
   of trees, OPcache.
+
+**Built** (21 November, fork PR #3), with these differences from the plan:
+- **One action:** `site` in the worker, with the operations info, stat, list, read, write, mkdir, rename, delete,
+  search, runPhp, request and cli.
+- **Revisions:** a revision is the SHA-256 of the content, not the mtime and size.
+- **Reference:** [SITE-API.md](SITE-API.md).
+- **Tests:** `tests/site-api/`.
 
 ## 2. AI agents: an MCP connection and an agent guide
 
@@ -75,6 +84,22 @@ AI client (stdio) → MCP server (Node, this repository: mcp/) → WebSocket on 
 
 Done when Claude Code, with only the MCP server configured, installs Weblinks in an open playground, adds a link
 through Joomla's own model, shows the front end page in the tab, and exports the site.
+
+**Built** (21 November, fork PRs #4 and #5). It differs from the plan in these ways:
+- **Tools:** 14 tools (see [mcp/README.md](../mcp/README.md)).
+  - Renamed: `joomla_navigate` became `joomla_show_page`, and `joomla_delete_file` became `joomla_delete`.
+  - Added: `joomla_search_files`, `joomla_move`, `joomla_create_folder`, `joomla_file_info` and
+    `joomla_playground_url`.
+  - Not built: `joomla_install_extension`, `joomla_read_mail`, `joomla_export_site` and `joomla_run_blueprint`.
+    An extension installs with `joomla_write_file` and `joomla_cli` (`extension:install`).
+- **Connecting:** `?mcp-port=<port>` (default 5480), confirmed in the page once per tab.
+  - There is no pairing code. The server gives its token only to the playground's own origins and localhost.
+  - Chrome and Edge also ask for their Local Network Access permission.
+  - The toolbar button shows the connection and disconnects it; it doesn't start one.
+- **Package:** not on npm yet; it runs from a checkout. The name is still open.
+- **Documentation:** [MCP.md](MCP.md), and the comparison with WordPress in [WORDPRESS-MCP.md](WORDPRESS-MCP.md).
+- **The "done when" check:** the end-to-end tests in Chrome (`mcp/test/browser.test.mjs`) cover files, requests,
+  the console and showing a page. The full Weblinks run in a real Claude Code session has not been done yet.
 
 ## 3. The code editor
 
