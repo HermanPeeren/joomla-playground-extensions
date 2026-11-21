@@ -18,7 +18,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test --test-timeout=600000 test/"
+    "test": "node --test --test-timeout=600000 test/server.test.mjs test/browser.test.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
