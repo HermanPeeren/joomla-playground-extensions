@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 1: Basic Component",
+    "description": "Joomla with com_example as it is after step 1 of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples). Opens the component's page on the site.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/index.php?option=com_example",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step01.zip"
+    }
+  ]
+}

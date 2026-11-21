@@ -53,5 +53,9 @@
   },
   "jcb/pkg_component_builder.zip": {
     "url": "https://github.com/joomengine/pkg-component-builder/archive/refs/tags/v6.2.0.zip"
+  },
+  "component-tutorial/com_example_step01.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step01_basic_component/com_example"
   }
 }
