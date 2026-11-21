@@ -1,6 +1,6 @@
 /joomla/
 /.cache/
-/node_modules/
+node_modules/
 /vendor/
 /build/
 cypress.env.json

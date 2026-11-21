@@ -1,0 +1,27 @@
+{
+  "name": "joomla-playground-mcp",
+  "version": "0.1.0",
+  "description": "MCP server that lets an AI assistant work on a Joomla Playground site running in the browser",
+  "license": "GPL-2.0-or-later",
+  "type": "module",
+  "bin": {
+    "joomla-playground-mcp": "server.mjs"
+  },
+  "files": [
+    "server.mjs",
+    "mcp-server.mjs",
+    "bridge.mjs",
+    "tools.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test --test-timeout=600000 test/"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "ws": "^8.23.0"
+  }
+}

@@ -89,6 +89,7 @@ jobs:
 
       - run: composer install --no-interaction --no-progress
       - run: npm ci --no-audit --no-fund
+      - run: npm ci --prefix mcp --no-audit --no-fund
 
       - name: CORS proxy and script tests
         run: |
@@ -102,6 +103,9 @@ jobs:
 
       - name: Site API tests (PHP in WebAssembly in Node, on the bundle)
         run: npm run test:site-api
+
+      - name: MCP server tests (with a fake tab, and end to end in Chrome)
+        run: npm run test:mcp
 
       - name: Browser tests
         run: npm run test:browser

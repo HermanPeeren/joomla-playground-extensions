@@ -126,6 +126,9 @@
     #sites-list button { color: #1a5fb4; border-color: #a7bfdc; }
     #sites-list button.delete { color: #a51d2d; border-color: #c6a0a6; }
 
+    #assistant[data-state="connected"] { border-color: var(--accent); color: var(--accent); }
+    #assistant[data-state="replaced"] { opacity: 0.6; }
+
     #mail-count:not(:empty) {
       margin-left: 4px;
       padding: 0 6px;
@@ -227,6 +230,7 @@
       <ul id="sites-list"></ul>
     </details>
     <button id="mail" type="button" disabled title="The mails this site sent: they are caught, not delivered">Mail<span id="mail-count"></span></button>
+    <button id="assistant" type="button" hidden></button>
     <span id="status">Loading</span>
     <span class="spacer"></span>
     <span><span id="credentials-label">Super User:</span> <span id="credentials">…</span></span>
