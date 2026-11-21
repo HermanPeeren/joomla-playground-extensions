@@ -1,7 +1,7 @@
 # From playground to developer playground: plan
 
 *20 November 2026; replaces the code-editor plan of 30 October. Why these steps: [JOOMENGINE.md](JOOMENGINE.md).
-Nothing of it is built yet.*
+Status 21 November 2026: steps 0, 1 and 2 are built in this fork (PRs #2 to #5); see the "Built" notes below.*
 
 The playground is good at showing Joomla and extensions. JoomEngine shows what developers want on top: an editor,
 debugging, a look in the database, the newest Joomla, and AI agents that can work in it. WordPress shows how an
