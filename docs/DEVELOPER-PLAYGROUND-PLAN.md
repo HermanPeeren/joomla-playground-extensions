@@ -146,3 +146,20 @@ run a query. Check first how WordPress Playground shows its database, which is s
 
 Step 0, then 1 and 2 together (2 needs 1, and is the quickest way to prove 1 works), then 3. Steps 4, 5, 6 and 8 are
 independent of each other and can be done in between; step 7.1 any time, step 7.2 last.
+
+## Sources
+
+- The analysis this plan is based on: [JOOMENGINE.md](JOOMENGINE.md) (with its own sources) and
+  [PHP-RUNTIMES.md](PHP-RUNTIMES.md)
+- JoomEngine's playground: https://github.com/joomengine/playground and https://playground.joomengine.org/
+- JoomEngine's int64 PHP build: https://github.com/joomengine/php-wasm-int64
+- JoomEngine Desktop: https://github.com/joomengine/joomengine and discussion
+  https://github.com/joomengine/Joomla-Component-Builder/discussions/1032
+- JoomEngine's agent skills: https://github.com/joomengine/skills
+- WordPress Playground's MCP server: https://www.npmjs.com/package/@wp-playground/mcp and
+  https://github.com/WordPress/wordpress-playground/tree/trunk/packages/playground/mcp
+- WordPress Playground's Xdebug bridge: https://www.npmjs.com/package/@php-wasm/xdebug-bridge
+- The code editor JoomEngine uses: https://github.com/CodinGame/monaco-vscode-api
+- WebMCP: https://github.com/webmachinelearning/webmcp
+- Agent Skills format: https://agentskills.io/
+- The upstream playground: https://github.com/joomla-projects/joomla-playground

@@ -158,14 +158,15 @@ for embedding.
 
 ## Sources
 
-- joomengine/playground README and docs (`joomengine-code-*.md`, `browser-compatibility.md`, `network.md`,
+- joomengine/playground (https://github.com/joomengine/playground): README and docs (`joomengine-code-*.md`, `browser-compatibility.md`, `network.md`,
   `database-user-guide.md`, `mail-capture.md`), `versions.json`, `deploys/`, commits 30 October–19 November 2026
-- joomengine/php-wasm-int64: README, `versions.json`, `docs/architecture.md`, `patches/`
-- joomengine/joomengine: README, `src/desktop.hpp`, `src/qt.cpp`, `docs/using.md`, `docs/troubleshooting.md`
-- joomengine/skills: `AGENTS.md`, `registries/skills.json`, `testing/playground/*`, `workflows/mcp.md`,
+- joomengine/php-wasm-int64 (https://github.com/joomengine/php-wasm-int64): README, `versions.json`, `docs/architecture.md`, `patches/`
+- joomengine/joomengine (https://github.com/joomengine/joomengine): README, `src/desktop.hpp`, `src/qt.cpp`, `docs/using.md`, `docs/troubleshooting.md`
+- joomengine/skills (https://github.com/joomengine/skills): `AGENTS.md`, `registries/skills.json`, `testing/playground/*`, `workflows/mcp.md`,
   `workflows/delivery.md`
 - Discussion [#1032](https://github.com/joomengine/Joomla-Component-Builder/discussions/1032), 20 November 2026
-- WordPress Playground: `packages/php-wasm/compile/php/Dockerfile`, npm `@wp-playground/mcp` and
-  `@php-wasm/xdebug-bridge` 3.1.54–3.1.65 (READMEs)
-- Measurements and phpinfo of playground.joomengine.org and hermanpeeren.github.io/joomla-playground-extensions,
+- WordPress Playground (https://github.com/WordPress/wordpress-playground): `packages/php-wasm/compile/php/Dockerfile`,
+  npm [`@wp-playground/mcp`](https://www.npmjs.com/package/@wp-playground/mcp) and
+  [`@php-wasm/xdebug-bridge`](https://www.npmjs.com/package/@php-wasm/xdebug-bridge) 3.1.54–3.1.65 (READMEs)
+- Measurements and phpinfo of https://playground.joomengine.org/ and https://hermanpeeren.github.io/joomla-playground-extensions/,
   30 October and 20 November 2026

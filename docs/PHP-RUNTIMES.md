@@ -200,3 +200,8 @@ Building any of this waits for a decision.
 - [mglaman/wasm-drupal](https://github.com/mglaman/wasm-drupal), [aschmelyun/liminal](https://github.com/aschmelyun/liminal),
   [macopedia/typo3-wasm-playground](https://github.com/macopedia/typo3-wasm-playground)
 - Measurements: Windows 11, Node.js 20.18, Chrome (Playwright), 28 October 2026
+- For the update of 20 November 2026: [joomengine/php-wasm-int64](https://github.com/joomengine/php-wasm-int64)
+  (README, `versions.json`, `docs/architecture.md`, `patches/`), WordPress Playground's
+  [`packages/php-wasm/compile/php/Dockerfile`](https://github.com/WordPress/wordpress-playground/blob/trunk/packages/php-wasm/compile/php/Dockerfile)
+  (`-D__x86_64__`), phpinfo of https://playground.joomengine.org/ and
+  https://hermanpeeren.github.io/joomla-playground-extensions/ (20 November 2026)
