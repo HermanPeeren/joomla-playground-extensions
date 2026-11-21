@@ -51,6 +51,8 @@ let playground = null;
  * for it (show()).
  */
 let serviceWorkerReady = null;
+/** Settles when the frame has loaded the first page of the current playground (see show()). */
+let firstPageLoaded = Promise.resolve();
 let readyStatus = '';
 let backgroundStatus = null;
 
@@ -179,12 +181,25 @@ function show(path = '/administrator/') {
   elements.joomla.value = playground.manifest.joomla;
   elements.info.title = Object.entries(playground.timings).map(([step, ms]) => `${step}: ${ms} ms`).join('\n');
   setBusy(false);
+  let loaded;
+
+  firstPageLoaded = new Promise((resolve) => (loaded = resolve));
   serviceWorkerReady
     .then(() => {
-      elements.frame.addEventListener('load', () => setLoading(false), { once: true });
+      elements.frame.addEventListener(
+        'load',
+        () => {
+          setLoading(false);
+          loaded();
+        },
+        { once: true }
+      );
       elements.frame.src = `${playground.siteUrl}${path}`;
     })
-    .catch((error) => setStatus(`The service worker did not start: ${error.message}`, true));
+    .catch((error) => {
+      loaded();
+      setStatus(`The service worker did not start: ${error.message}`, true);
+    });
 
   // A new playground (another site, Joomla or PHP version): the assistant hears of it.
   assistant?.hello();
@@ -586,11 +601,13 @@ function setUpAssistant() {
   const context = {
     playground: () => playground,
     call,
-    // After the service worker is ready, like show(): the frame's first page must not replace this one.
-    showUrl: (url) =>
-      serviceWorkerReady.then(() => {
-        elements.frame.src = url;
-      }),
+    // After the frame's first page (at most 20 s): a navigation to that page still under way, with Joomla's
+    // redirects, could otherwise replace this one.
+    showUrl: async (url) => {
+      await serviceWorkerReady;
+      await Promise.race([firstPageLoaded, new Promise((resolve) => setTimeout(resolve, 20000))]);
+      elements.frame.src = url;
+    },
     onState: (state) => {
       const labels = {
         waiting: ['AI assistant: waiting', 'Waiting for the MCP server of the assistant on this computer; click to disconnect'],
