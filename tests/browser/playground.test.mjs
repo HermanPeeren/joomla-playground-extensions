@@ -817,9 +817,23 @@ describe('Blueprints', () => {
       assert.equal(start, `${appUrl}?new`);
       await tab.waitForSelector('#home-default-version:not(:text-is("Joomla"))', { timeout: 30000 });
 
-      const demos = await tab.locator('.card a.open').evaluateAll((links) => links.map((link) => new URL(link.href).search));
+      const demos = await tab.locator('section:not(.fork-only) .card a.open').evaluateAll((links) => links.map((link) => new URL(link.href).search));
 
       assert.deepEqual(demos, ['?blueprint=patchtester', '?blueprint=heritage-demo', '?blueprint=weblinks']);
+
+      // The fork's own demos, marked as such: JCB (with the JoomEngine Playground), the tutorial's 18 steps and the
+      // AI assistant's instructions.
+      const fork = tab.locator('section.fork-only');
+      const forkLinks = await fork.locator('a').evaluateAll((links) => links.map((link) => link.href));
+
+      assert.equal(await fork.locator('.card .fork-tag').count(), 3);
+      assert.ok(forkLinks.includes(`${appUrl}?blueprint=jcb`));
+      assert.ok(forkLinks.includes('https://playground.joomengine.org/'));
+      assert.ok(forkLinks.some((link) => link.endsWith('#an-ai-assistant-in-the-playground-mcp')));
+
+      for (let step = 1; step <= 18; step++) {
+        assert.ok(forkLinks.includes(`${appUrl}?blueprint=component-tutorial-step${String(step).padStart(2, '0')}`), `step ${step}`);
+      }
 
       // The tours, from their list: one link per tutorial, to a blueprint the playground serves.
       await tab.waitForSelector('#home-tours-list a', { timeout: 30000 });
