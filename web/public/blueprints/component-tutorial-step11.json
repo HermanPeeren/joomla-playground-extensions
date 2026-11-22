@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 11: Publishing",
+    "description": "Joomla with com_example as it is after step 11 (Publishing) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step11_publishing). Opens the list of landmarks in the administrator.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/administrator/index.php?option=com_example&view=landmarks",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step11.zip"
+    }
+  ]
+}

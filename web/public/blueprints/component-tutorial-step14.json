@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 14: Image",
+    "description": "Joomla with com_example as it is after step 14 (Image) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step14_image). Opens the list of landmarks in the administrator.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/administrator/index.php?option=com_example&view=landmarks",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step14.zip"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 2: Defining a Menuitem",
+    "description": "Joomla with com_example as it is after step 2 (Defining a Menuitem) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step02_menuitem). Opens a landmark on the site.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/index.php?option=com_example&view=landmark&id=1",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step02.zip"
+    }
+  ]
+}

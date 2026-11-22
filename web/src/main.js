@@ -58,6 +58,8 @@ let pullRequest = null;
  * for it (show()).
  */
 let serviceWorkerReady = null;
+/** Settles when the frame has loaded the first page of the current playground (see show()). */
+let firstPageLoaded = Promise.resolve();
 let readyStatus = '';
 let backgroundStatus = null;
 
@@ -186,12 +188,25 @@ function show(path = '/administrator/') {
   elements.joomla.value = playground.manifest.joomla;
   elements.info.title = Object.entries(playground.timings).map(([step, ms]) => `${step}: ${ms} ms`).join('\n');
   setBusy(false);
+  let loaded;
+
+  firstPageLoaded = new Promise((resolve) => (loaded = resolve));
   serviceWorkerReady
     .then(() => {
-      elements.frame.addEventListener('load', () => setLoading(false), { once: true });
+      elements.frame.addEventListener(
+        'load',
+        () => {
+          setLoading(false);
+          loaded();
+        },
+        { once: true }
+      );
       elements.frame.src = `${playground.siteUrl}${path}`;
     })
-    .catch((error) => setStatus(`The service worker did not start: ${error.message}`, true));
+    .catch((error) => {
+      loaded();
+      setStatus(`The service worker did not start: ${error.message}`, true);
+    });
 
   // A new playground (another site, Joomla or PHP version): the assistant hears of it.
   assistant?.hello();
@@ -757,11 +772,39 @@ function setUpAssistant() {
   const context = {
     playground: () => playground,
     call,
-    // After the service worker is ready, like show(): the frame's first page must not replace this one.
-    showUrl: (url) =>
-      serviceWorkerReady.then(() => {
+    // After the frame's first page (at most 20 s): a navigation to that page still under way, with Joomla's
+    // redirects, could otherwise replace this one. The page that is there can still navigate before it unloads:
+    // Joomla's guided tour does so on the first visit to the administrator. Then the frame shows this URL again.
+    showUrl: async (url) => {
+      const wait = (promise) => Promise.race([promise, new Promise((resolve) => setTimeout(resolve, 20000))]);
+      const path = (href) => {
+        const { pathname, search } = new URL(href, location.href);
+
+        return pathname + search;
+      };
+
+      await serviceWorkerReady;
+      await wait(firstPageLoaded);
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const loaded = new Promise((resolve) => elements.frame.addEventListener('load', resolve, { once: true }));
+
         elements.frame.src = url;
-      }),
+        await wait(loaded);
+
+        let shown;
+
+        try {
+          shown = elements.frame.contentWindow.location.href;
+        } catch {
+          return;
+        }
+
+        if (path(shown) === path(url)) {
+          return;
+        }
+      }
+    },
     onState: (state) => {
       const labels = {
         waiting: ['AI assistant: waiting', 'Waiting for the MCP server of the assistant on this computer; click to disconnect'],

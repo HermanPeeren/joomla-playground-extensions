@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 3: Adding the Model",
+    "description": "Joomla with com_example as it is after step 3 (Adding the Model) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step03_2_landmarks). Opens a landmark on the site.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/index.php?option=com_example&view=landmark&id=1",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step03.zip"
+    }
+  ]
+}
