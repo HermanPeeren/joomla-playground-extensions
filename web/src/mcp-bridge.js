@@ -25,7 +25,13 @@ export function allowedPort(url = new URL(location.href)) {
 
   if (asked !== null) {
     url.searchParams.delete('mcp-port');
-    history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+
+    // The address without parameters is the overview (index.html): a reload must start an empty playground again.
+    if (url.search.length < 2 && url.hash.length < 2) {
+      url.searchParams.set('new', '');
+    }
+
+    history.replaceState(null, '', `${url.pathname}${url.search.replace(/=$/, '')}${url.hash}`);
 
     if (!/^\d{1,5}$/.test(asked) || Number(asked) < 1 || Number(asked) > 65535) {
       return null;
