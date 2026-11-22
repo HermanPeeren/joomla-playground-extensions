@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 7: Administrator Edit",
+    "description": "Joomla with com_example as it is after step 7 (Administrator Edit) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step07_admin_edit). Opens the list of landmarks in the administrator.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/administrator/index.php?option=com_example&view=landmarks",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step07.zip"
+    }
+  ]
+}

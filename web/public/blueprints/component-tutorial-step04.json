@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 4: Using the Database",
+    "description": "Joomla with com_example as it is after step 4 (Using the Database) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step04_database). Opens a landmark on the site.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/index.php?option=com_example&view=landmark&id=1",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step04.zip"
+    }
+  ]
+}

@@ -57,5 +57,73 @@
   "component-tutorial/com_example_step01.zip": {
     "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
     "folder": "component-tutorial/step01_basic_component/com_example"
+  },
+  "component-tutorial/com_example_step02.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step02_menuitem/com_example"
+  },
+  "component-tutorial/com_example_step03.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step03_2_landmarks/com_example"
+  },
+  "component-tutorial/com_example_step04.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step04_database/com_example"
+  },
+  "component-tutorial/com_example_step05.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step05_browser_title/com_example"
+  },
+  "component-tutorial/com_example_step06.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step06_admin_list/com_example"
+  },
+  "component-tutorial/com_example_step07.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step07_admin_edit/com_example"
+  },
+  "component-tutorial/com_example_step08.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step08_higher_level_mvc/com_example"
+  },
+  "component-tutorial/com_example_step09.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step09_add_record/com_example"
+  },
+  "component-tutorial/com_example_step10.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step10_delete_records/com_example"
+  },
+  "component-tutorial/com_example_step11.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step11_publishing/com_example"
+  },
+  "component-tutorial/com_example_step12.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step12_filter_form/com_example"
+  },
+  "component-tutorial/com_example_step13.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step13_alternative_delete/com_example"
+  },
+  "component-tutorial/com_example_step14.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step14_image/com_example"
+  },
+  "component-tutorial/com_example_step15.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step15_map/com_example"
+  },
+  "component-tutorial/com_example_step16.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step16_config/com_example"
+  },
+  "component-tutorial/com_example_step17.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step17_validation/com_example"
+  },
+  "component-tutorial/com_example_step18.zip": {
+    "url": "https://github.com/joomla/manual-examples/archive/refs/heads/main.zip",
+    "folder": "component-tutorial/step18_custom_validation/com_example"
   }
 }

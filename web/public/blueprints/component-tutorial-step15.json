@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 15: JavaScript Map",
+    "description": "Joomla with com_example as it is after step 15 (JavaScript Map) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step15_map). Opens the list of landmarks in the administrator.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/administrator/index.php?option=com_example&view=landmarks",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step15.zip"
+    }
+  ]
+}

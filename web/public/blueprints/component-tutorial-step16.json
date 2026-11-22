@@ -1,0 +1,17 @@
+{
+  "meta": {
+    "title": "Component tutorial, step 16: Config and Install Script",
+    "description": "Joomla with com_example as it is after step 16 (Config and Install Script) of the Component Development Tutorial of the Joomla Manual (code from joomla/manual-examples, step16_config). Opens the list of landmarks in the administrator.",
+    "author": "Joomla Playground"
+  },
+  "preferredVersions": {
+    "joomla": "6.2"
+  },
+  "landingPage": "/administrator/index.php?option=com_example&view=landmarks",
+  "steps": [
+    {
+      "step": "installExtension",
+      "url": "assets/component-tutorial/com_example_step16.zip"
+    }
+  ]
+}
