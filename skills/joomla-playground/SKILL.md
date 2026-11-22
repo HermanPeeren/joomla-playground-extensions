@@ -49,8 +49,15 @@ in the middle of a task.
   - `["list"]` shows the commands.
   - Common ones: `extension:list`, `extension:install --path=…`, `cache:clean`, `config:get`, `config:set`,
     `user:add`, `site:down` and `site:up`, `scheduler:list` and `scheduler:run`, `database:export`.
-- **Installing an extension:** write the zip with `joomla_write_file` (`base64`) under `tmp/`, then run
-  `["extension:install", "--path=tmp/<file>.zip"]`.
+- **Installing an extension:**
+  - **From a URL** the playground's PHP can reach, Joomla downloads it itself:
+    `["extension:install", "--url=<url>"]`. The playground's own site works, for example its blueprint assets
+    (`<playground>/blueprints/assets/weblinks/pkg_weblinks.zip`), and so do hosts that allow downloads from a
+    browser page (CORS). GitHub release downloads do not: they fail with HTTP 400.
+  - **A small zip you have** (up to a few hundred KB): write it with `joomla_write_file` (`base64`) under `tmp/`,
+    then run `["extension:install", "--path=tmp/<file>.zip"]`. A larger zip is too big for one tool call as base64.
+  - **Otherwise,** ask the user to install it in the administrator (System → Install → Extensions, Upload Package
+    File), and check the result with `["extension:list"]`.
 - **PHP code:** `joomla_run_php` runs code in the site's root. For Joomla's API, bootstrap it first, like
   Joomla's own `index.php`. Include `defines.php` first: it registers the playground's database driver.
   Without it, every query fails with "Unable to load Database Driver: mysqlonsqlite".
