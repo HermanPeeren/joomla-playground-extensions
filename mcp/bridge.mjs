@@ -53,7 +53,19 @@ export class PlaygroundBridge {
    * Listens on 127.0.0.1; with port 0 on a free port.
    */
   async listen(port = 0) {
-    this.http = createServer((request, response) => this.answerHttp(request, response));
+    const http = createServer((request, response) => this.answerHttp(request, response));
+
+    // Listen before the WebSocket server is attached: it repeats the HTTP server's errors as its own, and a port in
+    // use (another assistant's server) would then crash this process instead of rejecting here.
+    await new Promise((resolve, reject) => {
+      http.once('error', reject);
+      http.listen(port, '127.0.0.1', () => {
+        http.off('error', reject);
+        resolve();
+      });
+    });
+
+    this.http = http;
     this.wss = new WebSocketServer({
       server: this.http,
       maxPayload: 64 * 1024 * 1024,
@@ -71,14 +83,7 @@ export class PlaygroundBridge {
       },
     });
     this.wss.on('connection', (socket) => this.connected(socket));
-
-    await new Promise((resolve, reject) => {
-      this.http.once('error', reject);
-      this.http.listen(port, '127.0.0.1', () => {
-        this.http.off('error', reject);
-        resolve();
-      });
-    });
+    this.wss.on('error', (error) => this.log(`Bridge error: ${error.message}`));
 
     return this.port;
   }
