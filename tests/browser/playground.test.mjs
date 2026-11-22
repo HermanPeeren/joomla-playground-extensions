@@ -548,6 +548,18 @@ describe('Blueprints', () => {
       // The branch name works too, and "6" is still the newest release, not the development branch.
       assert.equal((await waitForPlaygroundAt(tab, `${appUrl}?joomla=${development.branch}`, result.siteUrl)).manifest.joomla, development.joomla);
       assert.equal((await waitForPlaygroundAt(tab, `${appUrl}?joomla=${development.joomla.split('.')[0]}`, null)).manifest.branch, undefined);
+
+      // The branch of a release (6.2-dev), when it has a nightly build: by its name, and "6.2" is still the release.
+      const maintenance = versions.versions.slice(1).find((bundle) => bundle.branch);
+
+      if (maintenance) {
+        const release = versions.versions.find((bundle) => !bundle.branch && `${bundle.joomla}`.startsWith(maintenance.branch.replace(/-dev$/, '.')));
+
+        assert.ok(release, `${maintenance.branch} is the branch of a release in the list`);
+        assert.equal((await waitForPlaygroundAt(tab, `${appUrl}?joomla=${maintenance.branch}`, null)).manifest.joomla, maintenance.joomla);
+        assert.equal(await tab.locator('#joomla-version option:checked').textContent(), maintenance.branch);
+        assert.equal((await waitForPlaygroundAt(tab, `${appUrl}?joomla=${maintenance.branch.replace(/-dev$/, '')}`, null)).manifest.joomla, release.joomla);
+      }
     } finally {
       await tab.close();
     }
@@ -727,8 +739,12 @@ describe('Blueprints', () => {
       await tab.goto(`${appUrl}?pr=12345`);
 
       const result = await waitForPlayground(tab);
+      // The pull request is for 6.2-dev: the nightly build of that branch if there is one, or else the 6.2 release.
+      const versions = JSON.parse(readFileSync(`${root}/web/dist/joomla/versions.json`, 'utf8'));
+      const expected = versions.versions.find((bundle) => bundle.branch === '6.2-dev') ?? versions.versions.find((bundle) => bundle.joomla.startsWith('6.2.'));
 
       assert.equal(result.blueprintError, null);
+      assert.equal(result.manifest.joomla, expected.joomla);
       await tab.waitForSelector('#pull-request-toggle:not([disabled])', { timeout: 60000 });
       assert.equal(await tab.locator('#pull-request-link').textContent(), 'PR #12345');
       assert.equal(await tab.locator('#pull-request-link').getAttribute('title'), 'A test pull request (6.2-dev)');
@@ -817,23 +833,19 @@ describe('Blueprints', () => {
       assert.equal(start, `${appUrl}?new`);
       await tab.waitForSelector('#home-default-version:not(:text-is("Joomla"))', { timeout: 30000 });
 
-      const demos = await tab.locator('section:not(.fork-only) .card a.open').evaluateAll((links) => links.map((link) => new URL(link.href).search));
+      const demos = await tab.locator('#demos .card a.open').evaluateAll((links) => links.map((link) => new URL(link.href).search));
 
       assert.deepEqual(demos, ['?blueprint=patchtester', '?blueprint=heritage-demo', '?blueprint=weblinks']);
 
-      // The fork's own demos, marked as such: JCB (with the JoomEngine Playground), the tutorial's 18 steps and the
-      // AI assistant's instructions.
-      const fork = tab.locator('section.fork-only');
-      const forkLinks = await fork.locator('a').evaluateAll((links) => links.map((link) => link.href));
+      // The demos on the fork, marked as such: links to the fork's site, and to the JoomEngine Playground.
+      const fork = 'https://hermanpeeren.github.io/joomla-playground-extensions/';
+      const forkLinks = await tab.locator('#fork a').evaluateAll((links) => links.map((link) => link.href));
 
-      assert.equal(await fork.locator('.card .fork-tag').count(), 3);
-      assert.ok(forkLinks.includes(`${appUrl}?blueprint=jcb`));
+      assert.equal(await tab.locator('#fork .fork-tag').count(), 4);
+      assert.ok(forkLinks.includes(`${fork}?blueprint=jcb`));
       assert.ok(forkLinks.includes('https://playground.joomengine.org/'));
+      assert.equal(forkLinks.filter((link) => link.startsWith(`${fork}?blueprint=component-tutorial-step`)).length, 19);
       assert.ok(forkLinks.some((link) => link.endsWith('#an-ai-assistant-in-the-playground-mcp')));
-
-      for (let step = 1; step <= 18; step++) {
-        assert.ok(forkLinks.includes(`${appUrl}?blueprint=component-tutorial-step${String(step).padStart(2, '0')}`), `step ${step}`);
-      }
 
       // The tours, from their list: one link per tutorial, to a blueprint the playground serves.
       await tab.waitForSelector('#home-tours-list a', { timeout: 30000 });
