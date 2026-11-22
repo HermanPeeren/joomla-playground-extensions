@@ -602,11 +602,37 @@ function setUpAssistant() {
     playground: () => playground,
     call,
     // After the frame's first page (at most 20 s): a navigation to that page still under way, with Joomla's
-    // redirects, could otherwise replace this one.
+    // redirects, could otherwise replace this one. The page that is there can still navigate before it unloads:
+    // Joomla's guided tour does so on the first visit to the administrator. Then the frame shows this URL again.
     showUrl: async (url) => {
+      const wait = (promise) => Promise.race([promise, new Promise((resolve) => setTimeout(resolve, 20000))]);
+      const path = (href) => {
+        const { pathname, search } = new URL(href, location.href);
+
+        return pathname + search;
+      };
+
       await serviceWorkerReady;
-      await Promise.race([firstPageLoaded, new Promise((resolve) => setTimeout(resolve, 20000))]);
-      elements.frame.src = url;
+      await wait(firstPageLoaded);
+
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const loaded = new Promise((resolve) => elements.frame.addEventListener('load', resolve, { once: true }));
+
+        elements.frame.src = url;
+        await wait(loaded);
+
+        let shown;
+
+        try {
+          shown = elements.frame.contentWindow.location.href;
+        } catch {
+          return;
+        }
+
+        if (path(shown) === path(url)) {
+          return;
+        }
+      }
     },
     onState: (state) => {
       const labels = {
