@@ -53,7 +53,7 @@ describe('Joomla Playground in the browser', () => {
     // The PHP worker logs every snapshot of a saved site (size and duration).
     page.on('console', (message) => message.text().startsWith('Snapshot of') && console.log(message.text()));
 
-    await page.goto(appUrl);
+    await page.goto(`${appUrl}?new`);
     await page.waitForFunction(() => window.joomlaPlayground || document.querySelector('#status.error'), null, { timeout: 180000 });
 
     playground = await page.evaluate(() => window.joomlaPlayground);
@@ -209,7 +209,7 @@ describe('Joomla Playground in the browser', () => {
     const second = await page.context().newPage();
 
     try {
-      await second.goto(appUrl);
+      await second.goto(`${appUrl}?new`);
       await second.waitForFunction(() => window.joomlaPlayground, null, { timeout: 180000 });
 
       const other = await second.evaluate(() => window.joomlaPlayground);
@@ -333,7 +333,7 @@ describe('Joomla Playground in the browser', () => {
     assert.ok(media.empty < 10, `${media.empty} empty files in media/`);
 
     // A new temporary playground does not have the article...
-    await page.goto(appUrl);
+    await page.goto(`${appUrl}?new`);
     const fresh = await waitForPlayground(page);
 
     assert.equal(fresh.site, null);
@@ -482,7 +482,7 @@ describe('Blueprints', () => {
 
   test('starts another Joomla version, with its own media files', async () => {
     const versions = JSON.parse(readFileSync(`${root}/web/dist/joomla/versions.json`, 'utf8'));
-    const other = versions.versions.find((bundle) => bundle.joomla !== versions.default);
+    const other = versions.versions.find((bundle) => bundle.joomla !== versions.default && !bundle.branch);
 
     if (!other) {
       return;
@@ -520,6 +520,37 @@ describe('Blueprints', () => {
     await missing.waitForSelector('#status.error', { timeout: 60000 });
     assert.match(await missing.locator('#status').textContent(), /Joomla 3 is not available/);
     await missing.close();
+  });
+
+  test('starts the development branch (?joomla=dev), a nightly build', async () => {
+    const versions = JSON.parse(readFileSync(`${root}/web/dist/joomla/versions.json`, 'utf8'));
+    const development = versions.versions.find((bundle) => bundle.branch);
+
+    if (!development) {
+      return;
+    }
+
+    assert.match(development.branch, /^\d+\.\d+-dev$/);
+    assert.equal(versions.versions[0], development, 'The development branch is the newest version');
+
+    const tab = await context.newPage();
+
+    try {
+      await tab.goto(`${appUrl}?joomla=dev`);
+
+      const result = await waitForPlayground(tab);
+
+      assert.equal(result.manifest.joomla, development.joomla);
+      assert.equal(await tab.inputValue('#joomla-version'), development.joomla);
+      assert.equal(await tab.locator('#joomla-version option:checked').textContent(), development.branch);
+      assert.ok((await tab.locator('#info').textContent()).startsWith(`Joomla ${development.development} `));
+
+      // The branch name works too, and "6" is still the newest release, not the development branch.
+      assert.equal((await waitForPlaygroundAt(tab, `${appUrl}?joomla=${development.branch}`, result.siteUrl)).manifest.joomla, development.joomla);
+      assert.equal((await waitForPlaygroundAt(tab, `${appUrl}?joomla=${development.joomla.split('.')[0]}`, null)).manifest.branch, undefined);
+    } finally {
+      await tab.close();
+    }
   });
 
   test('?language= installs a language pack and makes it the default', async () => {
@@ -712,6 +743,41 @@ describe('Blueprints', () => {
     }
   });
 
+  test('the overview (overview/) links to the playground, its demos and the guided tours', async () => {
+    const tab = await context.newPage();
+
+    try {
+      // The address without parameters is the overview.
+      await tab.goto(appUrl);
+      await tab.waitForURL(`${appUrl}overview/`);
+
+      const start = await tab.locator('a.start').evaluate((link) => link.href);
+
+      assert.equal(start, `${appUrl}?new`);
+      await tab.waitForSelector('#home-default-version:not(:text-is("Joomla"))', { timeout: 30000 });
+
+      const demos = await tab.locator('.card a.open').evaluateAll((links) => links.map((link) => new URL(link.href).search));
+
+      assert.deepEqual(demos, ['?blueprint=heritage-demo', '?blueprint=patchtester', '?blueprint=weblinks']);
+
+      // The tours, from their list: one link per tutorial, to a blueprint the playground serves.
+      await tab.waitForSelector('#home-tours-list a', { timeout: 30000 });
+
+      const tour = await tab.locator('#home-tours-list a').first().evaluate((link) => link.href);
+      const blueprint = new URL(new URL(tour).searchParams.get('blueprint-url'), appUrl);
+
+      assert.ok(tour.startsWith(`${appUrl}?blueprint-url=blueprints/tours/`), tour);
+      assert.equal((await fetch(blueprint)).status, 200, blueprint.href);
+
+      // Test a pull request: the form makes a ?pr= link (the playground it opens does not ask GitHub here).
+      await tab.route('https://api.github.com/**', (route) => route.fulfill({ status: 404, body: '' }));
+      await tab.fill('#home-pr-form input[name="pr"]', 'https://github.com/joomla/joomla-cms/pull/12345');
+      await Promise.all([tab.waitForURL(/\?pr=12345$/), tab.click('#home-pr-form button')]);
+    } finally {
+      await tab.close();
+    }
+  });
+
   test('reports a wrong blueprint', async () => {
     const tab = await context.newPage();
 
@@ -739,6 +805,17 @@ async function waitForPlayground(target, previousSiteUrl = null) {
   assert.ok(result && result.siteUrl !== previousSiteUrl, await target.locator('#status').textContent());
 
   return result;
+}
+
+/**
+ * Opens a link in the tab and waits for its new playground.
+ */
+async function waitForPlaygroundAt(target, url, previousSiteUrl) {
+  const previous = previousSiteUrl ?? (await target.evaluate(() => window.joomlaPlayground?.siteUrl ?? null));
+
+  await target.goto(url);
+
+  return waitForPlayground(target, previous);
 }
 
 /**
