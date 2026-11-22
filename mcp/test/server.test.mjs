@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import WebSocket from 'ws';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { PlaygroundBridge } from '../bridge.mjs';
 import { start } from '../mcp-server.mjs';
 import { TOOLS } from '../tools.js';
 
@@ -91,6 +92,18 @@ describe('the MCP server', () => {
 });
 
 describe('the bridge', () => {
+  test('a port in use is an error to handle, not a crash', async () => {
+    // A second assistant session starts its own server while the first one has the port.
+    const second = new PlaygroundBridge();
+
+    await assert.rejects(second.listen(server.bridge.port), { code: 'EADDRINUSE' });
+
+    const port = await second.listen(0);
+
+    assert.ok(port > 0 && port !== server.bridge.port);
+    await second.close();
+  });
+
   test('gives the token only to the playground\'s origins', async () => {
     const allowed = await fetch(`${base}/token`, { headers: { Origin: ORIGIN } });
 
