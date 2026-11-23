@@ -869,6 +869,43 @@ describe('Blueprints', () => {
     }
   });
 
+  test('?code opens the code panel: a saved change shows on the page, a PHP syntax error is not saved', async () => {
+    const path = 'components/com_example/tmpl/landmark/default.php';
+    const tab = await context.newPage();
+
+    await tab.goto(`${appUrl}?blueprint=component-tutorial-step05&code=${path}`);
+    await waitForPlayground(tab);
+    await tab.waitForSelector(`.code-tree button[aria-current][data-path="${path}"]`, { timeout: 60000 });
+    assert.equal(await tab.locator('#code').getAttribute('aria-pressed'), 'true');
+
+    const frame = await (await tab.waitForSelector('#joomla')).contentFrame();
+
+    await frame.waitForSelector('text=The Eiffel Tower', { timeout: 60000 });
+
+    // Edit as a user does, save with Ctrl+S: the page reloads and shows the change.
+    await tab.click('.cm-content');
+    await tab.keyboard.press('Control+End');
+    await tab.keyboard.type('<p>Edited in the code panel</p>');
+    await tab.keyboard.press('Control+S');
+    await frame.waitForSelector('text=Edited in the code panel', { timeout: 30000 });
+    assert.match(await tab.locator('.code-message').textContent(), /^Saved /);
+
+    // A syntax error: not saved, and the panel says where.
+    await tab.keyboard.press('Enter');
+    await tab.keyboard.type('<?php echo ; ?>');
+    await tab.keyboard.press('Control+S');
+    await tab.waitForSelector('.code-message[data-kind="error"]', { timeout: 30000 });
+    assert.match(await tab.locator('.code-message').textContent(), /Not saved: syntax error.* on line \d+/);
+
+    const onSite = await tab.evaluate((file) => window.joomlaPlaygroundSite('read', { path: file }), path);
+
+    assert.match(onSite.text, /Edited in the code panel/);
+    assert.doesNotMatch(onSite.text, /echo ;/);
+    // Unsaved changes: leaving asks first; this test leaves anyway.
+    assert.equal(await tab.locator('.code-file').textContent(), `${path} ●`);
+    await tab.close({ runBeforeUnload: false });
+  });
+
   test('reports a wrong blueprint', async () => {
     const tab = await context.newPage();
 

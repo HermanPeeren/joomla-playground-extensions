@@ -24,6 +24,8 @@ export default defineConfig({
     target: 'es2022',
     outDir: 'dist',
     emptyOutDir: true,
+    // The code panel with CodeMirror (code-panel.js, about 715 kB, 240 kB compressed) loads only when it is opened.
+    chunkSizeWarningLimit: 800,
     // The playground (index.html), and the overview of what it offers (overview/index.html, at .../overview/).
     rollupOptions: {
       input: {

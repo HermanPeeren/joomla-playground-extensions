@@ -55,7 +55,10 @@ sent to a server.
   - **Where they open:** steps 1 to 5 on a landmark on the site, steps 6 to 18 on the list of landmarks in the
     administrator.
   - **What to try:** the code is in `components/com_example` and `administrator/components/com_example`. Change
-    it with an AI assistant (see [below](#an-ai-assistant-in-the-playground-mcp)) and reload to see the result.
+    it in the **Code** panel beside the page: save (Ctrl+S) and the page shows the result. A link can open the
+    panel with a file, e.g. step 5 with its template:
+    <https://hermanpeeren.github.io/joomla-playground-extensions/?blueprint=component-tutorial-step05&code=components/com_example/tmpl/landmark/default.php>.
+    An AI assistant can change it too (see [below](#an-ai-assistant-in-the-playground-mcp)).
   - **Updates:** the zips are built from the examples' main branch, so the next deploy picks up changes in the
     manual's code.
 - **Guided tours of the User Guide:** tutorials of the [Joomla User Guide](https://guide.joomla.org/tutorials) as
@@ -101,6 +104,7 @@ The toolbar above the site:
 | **Save…** | Keep this playground in your browser under a name. From then on, changes are saved as you work. |
 | **My sites** | Open, rename or delete the sites you saved. |
 | **Mail** | The mails the site sent. They are caught here, not delivered: try a password reset or a contact form. |
+| **Code** | An editor beside the site, with the site's files (see [The code panel](#the-code-panel)). |
 | **Export** | Download the whole site as a zip. |
 | **Import…** | Start a playground from such a zip, e.g. one someone sent you. |
 | **GitHub token…** | With the Patch Tester: the GitHub token the browser remembers for it (see the Patch Tester above). |
@@ -136,6 +140,24 @@ On the right:
 - Each tab is its own playground, with its own site and database.
 - Clearing your browser's site data for this address deletes the saved sites.
 
+## The code panel
+
+**Code** opens an editor beside the site, with the site's files in a tree. Change a file and save it (**Save** or
+Ctrl+S): the page beside it reloads and shows the result, usually in less than a second. Drag the divider to
+change the width; on a phone the editor is above the page.
+
+- **PHP files are checked before saving.** A syntax error is not saved: the panel says what is wrong and selects
+  the line.
+- **Changes count from the next request.** The playground clears PHP's cache (OPcache) for a saved file, so a
+  changed class is used at once.
+- **What needs a reinstall:** changes to an extension's manifest, its install SQL, a new namespace or new menu
+  entries are only read when the extension is installed. Install it again, or use an AI assistant to do so.
+- **If Joomla changed the file meanwhile** (or an AI assistant did), the panel asks before overwriting it.
+- **Temporary sites:** a reload of the whole page throws a temporary playground away, with your changes. Use
+  **Save…** to keep it; the panel asks before you leave a page with changes that are not saved.
+
+The panel and its editor ([CodeMirror](https://codemirror.net/)) load only when you open it.
+
 ## Setting up a playground with a link
 
 A link can say how a new playground should look. Add these to the address:
@@ -152,6 +174,7 @@ A link can say how a new playground should look. Add these to the address:
 | `blueprint` | `?blueprint=heritage-demo` | Set up the site with one of the playground's own blueprints (from its prebuilt copy, if it has one) |
 | `fresh` | `?blueprint=heritage-demo&fresh=1` | Run the blueprint, even if there is a prebuilt copy |
 | `pr` | `?pr=48831` | Test a pull request of joomla-cms: the Patch Tester, and a button to apply and revert it |
+| `code` | `?code=templates/cassiopeia/index.php` | Open the code panel with that file; `?code` alone opens it with no file |
 
 A **blueprint** is a small JSON file with the steps to set up a site. It can also be put in the address
 itself, after `#`. For example, this one installs Joomla's blog sample data, renames the site and opens the

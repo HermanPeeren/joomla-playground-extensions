@@ -405,6 +405,114 @@
       border: 0;
     }
 
+    /* The code panel (code-panel.js): an editor beside the Joomla frame. */
+    #code-panel {
+      flex: 0 0 var(--code-width, 50%);
+      min-inline-size: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--page);
+      color: var(--text);
+      font-size: 0.8125rem;
+    }
+
+    #code-panel[hidden], #code-divider[hidden] { display: none; }
+
+    #code-divider {
+      flex: 0 0 6px;
+      background: var(--line);
+      cursor: col-resize;
+      touch-action: none;
+    }
+
+    #code-divider:hover, #code-divider:focus-visible { background: var(--link-border); outline: none; }
+    #stage.resizing iframe { pointer-events: none; }
+
+    .code-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 8px;
+      padding: 6px 8px;
+      border-block-end: 1px solid var(--line);
+    }
+
+    .code-file {
+      flex: 1;
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-family: ui-monospace, Consolas, monospace;
+    }
+
+    .code-option { display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); }
+
+    .code-bar button {
+      min-block-size: 26px;
+      padding: 2px 10px;
+      border: 1px solid var(--link-border);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--link);
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .code-bar button:disabled { opacity: 0.4; cursor: default; }
+    .code-bar :where(button, input):focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+
+    .code-message { margin: 0; padding: 0 8px; min-block-size: 0; }
+    .code-message:not(:empty) { padding-block: 4px; border-block-end: 1px solid var(--line); }
+    .code-message[data-kind="error"] { color: var(--danger); }
+    .code-message[data-kind="ok"] { color: var(--text-muted); }
+
+    .code-body { flex: 1; min-block-size: 0; display: flex; }
+
+    .code-tree {
+      flex: 0 0 13rem;
+      overflow: auto;
+      padding: 4px 0;
+      border-inline-end: 1px solid var(--line);
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 0.75rem;
+    }
+
+    .code-tree ul { margin: 0; padding-inline-start: 12px; list-style: none; }
+    .code-tree > ul { padding-inline-start: 4px; }
+    .code-tree summary, .code-tree button { display: block; padding: 1px 4px; white-space: nowrap; cursor: pointer; }
+
+    .code-tree button {
+      inline-size: 100%;
+      border: 0;
+      background: none;
+      color: inherit;
+      font: inherit;
+      text-align: start;
+    }
+
+    .code-tree :where(summary, button):hover { background: var(--line-light); }
+    .code-tree :where(summary, button):focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
+    .code-tree button[aria-current] { background: var(--selected); }
+    .code-tree button.modified::after { content: " ●"; color: var(--link); }
+
+    .code-editor { flex: 1; min-inline-size: 0; overflow: hidden; }
+    .code-editor .cm-editor { block-size: 100%; font-size: 0.8125rem; }
+    .code-editor .cm-scroller { font-family: ui-monospace, Consolas, monospace; }
+
+    /* On a narrow screen: the editor above the page. */
+    @media (max-width: 767px) {
+      #stage { flex-direction: column; }
+      #code-panel { flex-basis: 55%; }
+      #code-divider { display: none; }
+      .code-body { flex-direction: column; }
+      .code-tree { flex-basis: 6rem; border-inline-end: 0; border-block-end: 1px solid var(--line); }
+    }
+
+    @media (pointer: coarse) {
+      .code-bar button { min-block-size: 44px; }
+    }
+
     /* While a playground starts: Joomla's own loader (joomla-core-loader) and what is happening. */
     #loading {
       position: absolute;
@@ -463,6 +571,7 @@
         <ul id="sites-list"></ul>
       </details>
       <button id="mail" type="button" disabled title="The mails this site sent: they are caught, not delivered">Mail <span id="mail-count"></span></button>
+      <button id="code" type="button" disabled aria-pressed="false" title="Edit the site's files beside the page: save, and the page shows the result">Code</button>
       <button id="assistant" type="button" hidden></button>
       <span id="pull-request" hidden>
         <span class="separator" aria-hidden="true"></span>
@@ -482,6 +591,8 @@
     </div>
   </header>
   <main id="stage">
+    <section id="code-panel" aria-label="Code" hidden></section>
+    <div id="code-divider" role="separator" aria-orientation="vertical" aria-label="Width of the code panel" tabindex="0" hidden></div>
     <iframe id="joomla" title="Joomla"></iframe>
     <div id="loading">
       <joomla-core-loader inline size="160" color="transparent" aria-hidden="true"></joomla-core-loader>
