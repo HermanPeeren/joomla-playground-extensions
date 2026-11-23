@@ -236,13 +236,16 @@ with Claude Code, Claude Desktop, Codex, Gemini CLI or another MCP client. The a
 AI assistant ──stdio──▶ MCP server (mcp/) ◀──WebSocket on 127.0.0.1── playground tab
 ```
 
-1. **Install the server** from a checkout. It is not on npm yet, and it needs Node.js 20 or later:
+1. **Add the server to your assistant.** It is on npm as
+   [`@hermanpeeren/joomla-playground-mcp`](https://www.npmjs.com/package/@hermanpeeren/joomla-playground-mcp) and
+   needs Node.js 20 or later. Your assistant starts it with `npx`, so there is nothing to install by hand. For
+   Claude Code:
 
    ```sh
-   git clone https://github.com/HermanPeeren/joomla-playground-extensions.git
-   cd joomla-playground-extensions/mcp && npm ci
-   claude mcp add --transport stdio --scope user joomla-playground -- node "$PWD/server.mjs"
+   claude mcp add --transport stdio --scope user joomla-playground -- npx -y @hermanpeeren/joomla-playground-mcp
    ```
+
+   Other assistants: see [mcp/README.md](mcp/README.md#setting-it-up).
 
 2. **Ask your assistant**, for example: "Open the Joomla Playground and show the reading time under every article
    title".
