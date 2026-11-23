@@ -1,7 +1,8 @@
 # An AI assistant in the Joomla Playground
 
-*Status 2026-11-21: in this fork only (`HermanPeeren/joomla-playground-extensions`), live on
-<https://hermanpeeren.github.io/joomla-playground-extensions/>. Not on npm yet.*
+*Status 2026-11-23: in this fork only (`HermanPeeren/joomla-playground-extensions`), live on
+<https://hermanpeeren.github.io/joomla-playground-extensions/>. The server is on npm as
+[`@hermanpeeren/joomla-playground-mcp`](https://www.npmjs.com/package/@hermanpeeren/joomla-playground-mcp).*
 
 The playground can connect to an AI assistant on your computer, such as Claude Code, Claude Desktop, Codex,
 Gemini CLI or another client of the [Model Context Protocol](https://modelcontextprotocol.io/) (MCP). The
@@ -132,7 +133,6 @@ The playground can host Joomla's own MCP server too: a blueprint with `com_mcp` 
   - PHP's outgoing requests go only through the proxy
   - a temporary site is lost after a reload
 - **Not there yet:**
-  - publishing on npm
   - Web Services API tokens
   - saving and renaming sites through the tools
   - tools that extensions register inside the site, the way WordPress plugins can

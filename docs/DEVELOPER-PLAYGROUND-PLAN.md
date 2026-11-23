@@ -96,7 +96,7 @@ through Joomla's own model, shows the front end page in the tab, and exports the
   - There is no pairing code. The server gives its token only to the playground's own origins and localhost.
   - Chrome and Edge also ask for their Local Network Access permission.
   - The toolbar button shows the connection and disconnects it; it doesn't start one.
-- **Package:** not on npm yet; it runs from a checkout. The name is still open.
+- **Package:** on npm as `@hermanpeeren/joomla-playground-mcp` (23 November 2026), started with `npx -y`.
 - **Documentation:** [MCP.md](MCP.md), and the comparison with WordPress in [WORDPRESS-MCP.md](WORDPRESS-MCP.md).
 - **The "done when" check:** the end-to-end tests in Chrome (`mcp/test/browser.test.mjs`) cover files, requests,
   the console and showing a page. On 21 November, a script did the Weblinks check through the MCP server, against
