@@ -15,20 +15,14 @@ playground page itself, which your browser loads as usual.
 
 ## Setting it up
 
-You need Node.js 20 or later. The server is not on npm yet, so it runs from a checkout of this repository:
-
-```sh
-git clone https://github.com/HermanPeeren/joomla-playground-extensions.git
-cd joomla-playground-extensions/mcp
-npm ci
-```
-
-Then add it to your assistant. Use the full path to `server.mjs`.
+You need Node.js 20 or later. The server is on npm as
+[`@hermanpeeren/joomla-playground-mcp`](https://www.npmjs.com/package/@hermanpeeren/joomla-playground-mcp), and
+your assistant starts it with `npx`, so there is nothing to install by hand.
 
 **Claude Code**
 
 ```sh
-claude mcp add --transport stdio --scope user joomla-playground -- node /path/to/joomla-playground-extensions/mcp/server.mjs
+claude mcp add --transport stdio --scope user joomla-playground -- npx -y @hermanpeeren/joomla-playground-mcp
 ```
 
 **JSON configuration** (Claude Desktop's `claude_desktop_config.json`, a project's `.mcp.json`, Gemini CLI's
@@ -38,11 +32,22 @@ claude mcp add --transport stdio --scope user joomla-playground -- node /path/to
 {
   "mcpServers": {
     "joomla-playground": {
-      "command": "node",
-      "args": ["/path/to/joomla-playground-extensions/mcp/server.mjs"]
+      "command": "npx",
+      "args": ["-y", "@hermanpeeren/joomla-playground-mcp"]
     }
   }
 }
+```
+
+Options (see below) go after the package name, e.g. `npx -y @hermanpeeren/joomla-playground-mcp --port=5481`.
+
+**From a checkout** (to change the server itself):
+
+```sh
+git clone https://github.com/HermanPeeren/joomla-playground-extensions.git
+cd joomla-playground-extensions/mcp
+npm ci
+claude mcp add --transport stdio --scope user joomla-playground -- node "$PWD/server.mjs"
 ```
 
 ## Using it
@@ -75,7 +80,7 @@ The assistant's changes go into the saved site too.
 | `joomla_cli` | Run a command of Joomla's console (`cli/joomla.php`) |
 | `joomla_show_page` | Show a page of the site in the playground |
 
-The tools build on the playground's [site API](../docs/SITE-API.md). That API keeps every path inside the site's
+The tools build on the playground's [site API](https://github.com/HermanPeeren/joomla-playground-extensions/blob/main/docs/SITE-API.md). That API keeps every path inside the site's
 root, prevents overwriting a file that changed meanwhile (revisions), and clears OPcache for changed PHP files.
 
 The same tools are offered to agents in the browser through [WebMCP](https://github.com/webmachinelearning/webmcp)
