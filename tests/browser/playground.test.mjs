@@ -906,6 +906,56 @@ describe('Blueprints', () => {
     await tab.close({ runBeforeUnload: false });
   });
 
+  test('the code panel shows what a tutorial step changed, installs the component again and resets the step', async () => {
+    const tab = await context.newPage();
+    // The component's version, as Joomla's console lists it (by its name, a language key).
+    const version = () => tab.evaluate(async (name) => {
+      const list = await window.joomlaPlaygroundSite('cli', { args: ['extension:list', '--type=component'] });
+
+      return list.output.split('\n').find((line) => line.includes(name))?.trim().split(/\s+/)[2];
+    }, 'COM_EXAMPLE_TITLE');
+
+    await tab.goto(`${appUrl}?blueprint=component-tutorial-step05&code`);
+    await waitForPlayground(tab);
+    await tab.waitForSelector('.code-step li button', { timeout: 60000 });
+
+    // Step 5 changed three files since step 4; the step's links lead to steps 4 and 6.
+    assert.equal(await tab.locator('.code-step h2').textContent(), 'Changed in step 5, since step 4');
+    assert.deepEqual(await tab.locator('.code-step li button').evaluateAll((buttons) => buttons.map((button) => button.dataset.path)), [
+      'administrator/components/com_example/example.xml',
+      'components/com_example/src/Controller/DisplayController.php',
+      'components/com_example/src/View/Landmark/HtmlView.php',
+    ]);
+    assert.match(await tab.locator('.code-next').getAttribute('href'), /\?blueprint=component-tutorial-step06&code$/);
+
+    // The view: the lines this step added are marked in the editor, and the marks can be switched off.
+    await tab.click('.code-step button[data-path="components/com_example/src/View/Landmark/HtmlView.php"]');
+    await tab.waitForSelector('.cm-changedLine, .cm-insertedLine', { timeout: 30000 });
+    await tab.click('.code-changes-toggle');
+    await tab.waitForSelector('.cm-changedLine, .cm-insertedLine', { state: 'detached', timeout: 30000 });
+    await tab.click('.code-changes-toggle');
+
+    // A change to the manifest counts after "Install again".
+    assert.equal(await version(), '0.5.0');
+    await tab.evaluate(async () => {
+      const path = 'administrator/components/com_example/example.xml';
+      const file = await window.joomlaPlaygroundSite('read', { path });
+
+      await window.joomlaPlaygroundSite('write', { path, text: file.text.replace(/<version>[^<]+</, '<version>0.5.1<'), revision: file.revision });
+    });
+    await tab.click('.code-install');
+    await tab.waitForFunction(() => /installed again|Not installed/.test(document.querySelector('.code-message').textContent), null, { timeout: 60000 });
+    assert.match(await tab.locator('.code-message').textContent(), /installed again/);
+    assert.equal(await version(), '0.5.1');
+
+    // "Reset to step": the step's package again, without the change.
+    tab.once('dialog', (dialog) => dialog.accept());
+    await tab.click('.code-reset-step');
+    await tab.waitForFunction(() => /files are back|Not installed/.test(document.querySelector('.code-message').textContent), null, { timeout: 60000 });
+    assert.equal(await version(), '0.5.0');
+    await tab.close();
+  });
+
   test('reports a wrong blueprint', async () => {
     const tab = await context.newPage();
 

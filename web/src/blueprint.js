@@ -42,7 +42,7 @@ export const STEPS = {
   setSiteLanguage: ['language'],
 };
 
-const KEYS = ['$schema', 'preferredVersions', 'landingPage', 'login', 'steps', 'meta'];
+const KEYS = ['$schema', 'preferredVersions', 'landingPage', 'login', 'steps', 'meta', 'code'];
 
 /**
  * @returns {Promise<object|null>} The blueprint of this page URL, or null when the URL asks for none.
@@ -158,6 +158,23 @@ export function validate(blueprint) {
 
   if (blueprint.landingPage !== undefined && !String(blueprint.landingPage).startsWith('/')) {
     throw new Error('The landing page is a path of the site, starting with "/"');
+  }
+
+  // For the code panel: the packages to compare, e.g. a tutorial step and the step before it (code-panel.js).
+  const changes = blueprint.code?.changes;
+
+  if (blueprint.code !== undefined && (typeof blueprint.code !== 'object' || blueprint.code === null)) {
+    throw new Error('"code" is an object');
+  }
+
+  if (changes !== undefined && (typeof changes?.to !== 'string' || (changes.from !== undefined && typeof changes.from !== 'string'))) {
+    throw new Error('"code.changes" needs "to", the package of this step, and may have "from", the one before it');
+  }
+
+  for (const key of ['previous', 'next']) {
+    if (changes?.[key] !== undefined && (typeof changes[key]?.href !== 'string' || typeof changes[key]?.label !== 'string')) {
+      throw new Error(`"code.changes.${key}" is { "href", "label" }: a link to that step`);
+    }
   }
 
   if (!Array.isArray(blueprint.steps)) {
