@@ -126,6 +126,23 @@ As in the October plan, now with JoomEngine's experience:
 Done when you can open `templates/cassiopeia/index.php`, change it, save, refresh and see the change, in a
 temporary and in a saved playground, and the playground starts as fast as before when the editor is not opened.
 
+**Prototype first** (23 November 2026, branch `feature/code-panel`): a light code panel for the component
+tutorial, before the VS Code workbench. It uses the same site API, so the workbench can replace or join it later.
+- **Editor:** CodeMirror 6 (MIT), in `web/src/code-panel.js`. It loads only when **Code** is clicked or the link
+  has `?code=<path>`: 715 kB, 240 kB compressed, in a chunk of its own.
+- **Layout:** the panel on the left of the frame, with a divider to drag (or the arrow keys). On a phone the editor
+  is above the page.
+- **Files:** a tree of the site's folders, loaded as they are opened; edits of several files are kept until saved.
+  Highlighting for PHP, JavaScript, CSS/SCSS, HTML, XML, JSON, SQL and INI.
+- **Save** (Ctrl+S): a PHP file is first checked with `token_get_all(..., TOKEN_PARSE)` in the site's PHP. A syntax
+  error is not saved, and the line is selected. Then a write with the file's revision; a conflict asks before
+  overwriting. After saving, the frame reloads its page (as a GET).
+- **Tested:** in Chrome, a change to step 5's template shows after Ctrl+S, and a syntax error is not saved
+  (`tests/browser/playground.test.mjs`). A changed view class showed at once; the reload took about 0.2 s.
+- **Not yet:** a diff with the previous tutorial step, "reset to this step" and "show the solution", a Reinstall
+  button for manifest and SQL changes, keeping unsaved edits of a temporary playground across a reload, a timeout
+  for code that does not end, completion and go to definition.
+
 ## 4. Safer and exact links
 
 - **Review before running.** A blueprint from another site (`blueprint-url`, or a blueprint in the URL hash) with

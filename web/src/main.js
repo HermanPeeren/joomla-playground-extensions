@@ -3,7 +3,8 @@
 //
 // ?site=<slug> opens a site saved in this browser; without it, a new temporary playground starts, set up by the
 // blueprint in the URL if there is one (see blueprint.js). ?new starts an empty one: the address without parameters
-// is the overview (index.html sends it on to overview/).
+// is the overview (index.html sends it on to overview/). ?code=<path> opens the code panel with that file
+// (code-panel.js).
 
 import { deleteSite, freeSlug, isSiteOpen, listSites, readMeta, renameSite } from './storage.js';
 import { PHP_VERSIONS, blueprintFromUrl } from './blueprint.js';
@@ -36,6 +37,10 @@ const elements = {
   sitesList: document.querySelector('#sites-list'),
   credentials: document.querySelector('#credentials'),
   assistant: document.querySelector('#assistant'),
+  stage: document.querySelector('#stage'),
+  code: document.querySelector('#code'),
+  codePanel: document.querySelector('#code-panel'),
+  codeDivider: document.querySelector('#code-divider'),
   info: document.querySelector('#info'),
   mail: document.querySelector('#mail'),
   mailCount: document.querySelector('#mail-count'),
@@ -77,6 +82,9 @@ let backgroundStatus = null;
 /** The Joomla bundles of this playground: { default: '6.2.0', versions: [manifest, ...] } (joomla/versions.json). */
 let bundles = null;
 const pending = new Map();
+/** The code panel (code-panel.js), once it was opened; codeRequested: the ?code file to open when ready. */
+let codePanel = null;
+let codeRequested = new URL(location.href).searchParams.get('code');
 /** The connection to an AI assistant, if any (see setUpAssistant()). */
 let assistant = null;
 let nextId = 1;
@@ -108,7 +116,7 @@ function setLoading(loading) {
 import(/* @vite-ignore */ new URL('joomla/joomla-core-loader.js', base).href).catch(() => {});
 
 function setBusy(busy) {
-  for (const button of [elements.site, elements.admin, elements.newSite, elements.save, elements.exportSite, elements.importSite, elements.mail, elements.php, elements.gitHubToken]) {
+  for (const button of [elements.site, elements.admin, elements.newSite, elements.save, elements.exportSite, elements.importSite, elements.mail, elements.code, elements.php, elements.gitHubToken]) {
     button.disabled = busy;
   }
 
@@ -250,6 +258,14 @@ function show(path = '/administrator/') {
 
   // A new playground (another site, Joomla or PHP version): the assistant hears of it.
   assistant?.hello();
+
+  // ?code or ?code=<path>: the code panel opens with the site, with that file.
+  if (codeRequested !== null) {
+    const path = codeRequested;
+
+    codeRequested = null;
+    toggleCode(true, path).catch((error) => setStatus(`The code panel did not open: ${error.message}`, true));
+  }
 
   // For tests and debugging; the export for scripts/build-demos.mjs.
   window.joomlaPlayground = playground;
@@ -839,6 +855,76 @@ async function forgetGitHubToken() {
   renderGitHubToken();
 }
 
+/**
+ * Opens or closes the code panel beside the frame (code-panel.js, loaded the first time), optionally with a file.
+ */
+async function toggleCode(show = elements.codePanel.hidden, path = '') {
+  if (show && !codePanel) {
+    elements.code.disabled = true;
+
+    try {
+      const { createCodePanel } = await import('./code-panel.js');
+
+      codePanel = createCodePanel(elements.codePanel, {
+        site: (operation, args) => call('site', { operation, args }),
+        reloadFrame,
+        onClose: () => toggleCode(false),
+      });
+      setUpDivider();
+    } finally {
+      elements.code.disabled = false;
+    }
+  }
+
+  elements.codePanel.hidden = !show;
+  elements.codeDivider.hidden = !show;
+  elements.code.setAttribute('aria-pressed', String(show));
+
+  if (show && path) {
+    await codePanel.open(path);
+  }
+}
+
+/** Shows the frame's page again (a GET, so a form is not sent twice), e.g. after a file was saved. */
+function reloadFrame() {
+  try {
+    const page = elements.frame.contentWindow.location.href;
+
+    elements.frame.contentWindow.location.replace(page);
+  } catch {
+    elements.frame.src = elements.frame.src;
+  }
+}
+
+/** The divider between the code panel and the frame: drag it, or use the arrow keys. */
+function setUpDivider() {
+  const setWidth = (pixels) => {
+    const total = elements.stage.clientWidth;
+    const width = Math.min(Math.max(pixels, 280), total - 200);
+
+    elements.stage.style.setProperty('--code-width', `${Math.round((width / total) * 1000) / 10}%`);
+  };
+
+  elements.codeDivider.addEventListener('pointerdown', (event) => {
+    elements.codeDivider.setPointerCapture(event.pointerId);
+    elements.stage.classList.add('resizing');
+  });
+  elements.codeDivider.addEventListener('pointermove', (event) => {
+    if (elements.codeDivider.hasPointerCapture(event.pointerId)) {
+      setWidth(event.clientX - elements.stage.getBoundingClientRect().left);
+    }
+  });
+  elements.codeDivider.addEventListener('lostpointercapture', () => elements.stage.classList.remove('resizing'));
+  elements.codeDivider.addEventListener('keydown', (event) => {
+    const step = { ArrowLeft: -40, ArrowRight: 40 }[event.key];
+
+    if (step) {
+      event.preventDefault();
+      setWidth(elements.codePanel.getBoundingClientRect().width + step);
+    }
+  });
+}
+
 function startOver() {
   if (confirm('Throw this playground away and start again from the same link?')) {
     location.reload();
@@ -892,6 +978,8 @@ async function start() {
     elements.tokenError.textContent = '';
   };
   elements.tokenForget.onclick = forgetGitHubToken;
+  elements.code.onclick = () => toggleCode().catch((error) => setStatus(`The code panel did not open: ${error.message}`, true));
+  addEventListener('beforeunload', (event) => codePanel?.hasChanges() && event.preventDefault());
   elements.mail.onclick = () => {
     elements.mailDialog.showModal();
     renderMails();
