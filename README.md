@@ -162,10 +162,45 @@ change the width; on a phone the editor is above the page.
 - **Changes count from the next request.** The playground clears PHP's cache (OPcache) for a saved file, so a
   changed class is used at once.
 - **What needs a reinstall:** changes to an extension's manifest, its install SQL, a new namespace or new menu
-  entries are only read when the extension is installed. Install it again, or use an AI assistant to do so.
+  entries are only read when the extension is installed. In a tutorial step, **Install again** does that (see
+  below); otherwise use an AI assistant.
 - **If Joomla changed the file meanwhile** (or an AI assistant did), the panel asks before overwriting it.
 - **Temporary sites:** a reload of the whole page throws a temporary playground away, with your changes. Use
   **Save…** to keep it; the panel asks before you leave a page with changes that are not saved.
+- **Code that never ends** (an endless loop) keeps the site busy: PHP in the browser has no time limit, and it
+  cannot be stopped. The panel says so when the page has not come back 15 seconds after a save; **Start over**
+  begins again, without your changes.
+
+**In the component tutorial** (the 18 `component-tutorial-stepNN` blueprints), the panel also shows what the step
+changed:
+- **Changed in this step:** above the tree, the files this step added (+) or changed (~) since the step before.
+  Open one, and the editor shows the changes: the new lines in green, the removed ones in red. **Changes** switches
+  this off and on.
+- **Install again** installs the component from its files on the site, as its manifest lists them: for changes to
+  the manifest, the SQL files, the languages or a new namespace. The database stays as it is.
+- **Reset to step** installs the step's own package again: the component's files are as in the step.
+- **← Step 4 · Step 6 →** open the step before or after, with the panel open.
+
+A blueprint does this with `code.changes`: the packages to compare, and where the installer puts their files.
+
+```json
+"code": {
+  "changes": {
+    "label": "Changed in step 5, since step 4",
+    "previous": { "href": "?blueprint=component-tutorial-step04&code", "label": "← Step 4" },
+    "next": { "href": "?blueprint=component-tutorial-step06&code", "label": "Step 6 →" },
+    "from": "assets/component-tutorial/com_example_step04.zip",
+    "to": "assets/component-tutorial/com_example_step05.zip",
+    "paths": {
+      "example.xml": "administrator/components/com_example/example.xml",
+      "components/com_example/language/": "language/"
+    }
+  }
+}
+```
+
+`from` and `to` are relative to the blueprint; without `from`, every file of `to` is new. `paths` maps a file, or a
+folder ending in `/`, of the package to its place on the site; other files keep their path.
 
 The panel and its editor ([CodeMirror](https://codemirror.net/)) load only when you open it.
 

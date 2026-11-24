@@ -33,6 +33,7 @@
       --line: #dddddd;
       --line-light: #eeeeee;
       --selected: #e8f0fb;
+      --added: #1a7f37;
       --loading: #f2f5fa;
       --loading-text: #1c2b4a;
       color-scheme: light dark;
@@ -51,6 +52,7 @@
         --line: #2c3750;
         --line-light: #253047;
         --selected: #263552;
+        --added: #57c27a;
         --loading: #0f151d;
         --loading-text: #e6ebf4;
       }
@@ -495,6 +497,34 @@
     .code-tree :where(summary, button):focus-visible { outline: 2px solid var(--link); outline-offset: -2px; }
     .code-tree button[aria-current] { background: var(--selected); }
     .code-tree button.modified::after { content: " ●"; color: var(--link); }
+
+    /* The files this step changed (a tutorial step and the one before it), above the tree. */
+    .code-step { padding-block-end: 6px; margin-block-end: 6px; border-block-end: 1px solid var(--line); }
+    .code-step[hidden] { display: none; }
+    .code-step h2 { margin: 2px 8px 4px; font: 600 0.75rem system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text-muted); }
+    .code-step ul { padding-inline-start: 4px; }
+    .code-step-actions { display: flex; flex-wrap: wrap; gap: 4px; margin: 0 8px 4px; }
+
+    .code-step-actions button {
+      inline-size: auto;
+      padding: 1px 6px;
+      border: 1px solid var(--link-border);
+      border-radius: 4px;
+      color: var(--link);
+      font: 0.6875rem system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    .code-step-actions button[hidden], .code-step-actions a[hidden] { display: none; }
+    .code-step-actions a { margin-inline-end: 8px; color: var(--link); font: 0.6875rem system-ui, -apple-system, "Segoe UI", sans-serif; align-self: center; }
+    .code-step-actions a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+    .code-step-actions button:disabled { opacity: 0.4; cursor: default; }
+    .code-status { display: inline-block; inline-size: 1.2em; font-weight: 700; }
+    .code-step button { padding-block: 2px; }
+    .code-folder { display: block; padding-inline-start: 1.2em; overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); font-size: 0.6875rem; line-height: 1.4; }
+    .code-status.added { color: var(--added); }
+    .code-status.changed { color: var(--link); }
+    .code-status.removed { color: var(--danger); }
+    .code-bar button[aria-pressed="true"] { background: var(--selected); }
 
     .code-editor { flex: 1; min-inline-size: 0; overflow: hidden; }
     .code-editor .cm-editor { block-size: 100%; font-size: 0.8125rem; }
