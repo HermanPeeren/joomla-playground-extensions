@@ -11,6 +11,7 @@ import { PHP_VERSIONS, blueprintFromUrl } from './blueprint.js';
 import { parseMail } from './mail.js';
 import { allowedPort, connectAssistant, registerWebMcpTools } from './mcp-bridge.js';
 import { forgetToken, gitHubHeaders, rememberToken, rememberedToken } from './github-token.js';
+import { askText, closeOnBackdropClick, confirmAction, tell } from './dialogs.js';
 
 const base = new URL('./', location.href);
 
@@ -33,7 +34,6 @@ const elements = {
   exportSite: document.querySelector('#export-site'),
   importSite: document.querySelector('#import-site'),
   importFile: document.querySelector('#import-file'),
-  sitesMenu: document.querySelector('#sites-menu'),
   sitesList: document.querySelector('#sites-list'),
   credentials: document.querySelector('#credentials'),
   assistant: document.querySelector('#assistant'),
@@ -278,7 +278,7 @@ function show(path = '/administrator/') {
 }
 
 async function saveSite() {
-  const title = prompt('Save this playground in your browser as:', 'My Joomla site');
+  const title = await askText('Save this playground in your browser as:', 'My Joomla site', { confirmLabel: 'Save' });
 
   if (!title) {
     return;
@@ -349,6 +349,18 @@ async function importSite(file) {
   }
 }
 
+/**
+ * Shows the saved sites again after a question about one of them: a modal dialog closes the My sites popover, so it
+ * opens again (and its toggle fills it), or, where it stayed open, is filled again.
+ */
+function showSites() {
+  if (elements.sitesList.matches(':popover-open')) {
+    renderSites();
+  } else {
+    elements.sitesList.showPopover();
+  }
+}
+
 async function renderSites() {
   const sites = await listSites();
 
@@ -375,25 +387,23 @@ async function renderSites() {
     remove.setAttribute('aria-label', `Delete ${site.title}`);
 
     rename.onclick = async () => {
-      const title = prompt('New name for this site:', site.title)?.trim();
+      const title = (await askText('New name for this site:', site.title, { confirmLabel: 'Rename' }))?.trim();
 
       if (title && title !== site.title) {
         await renameSite(site.slug, title);
-        await renderSites();
       }
+
+      showSites();
     };
 
     remove.onclick = async () => {
       if (await isSiteOpen(site.slug)) {
-        alert(`"${site.title}" is open in a tab. Close it first (or start a new playground there).`);
-
-        return;
-      }
-
-      if (confirm(`Delete "${site.title}" from this browser? This cannot be undone.`)) {
+        await tell(`"${site.title}" is open in a tab. Close it first (or start a new playground there).`);
+      } else if (await confirmAction(`Delete "${site.title}" from this browser? This cannot be undone.`, { confirmLabel: 'Delete', danger: true })) {
         await deleteSite(site.slug);
-        await renderSites();
       }
+
+      showSites();
     };
 
     actions.append(rename, remove);
@@ -462,11 +472,11 @@ function renderMails() {
  * Another PHP version: a saved site reopens with it (and keeps it); a temporary playground starts again from the
  * same link with it.
  */
-function switchPhp() {
+async function switchPhp() {
   const version = elements.php.value;
   const url = new URL(location.href);
 
-  if (!playground.site && !confirm(`Start a new playground with PHP ${version}? This one is not saved and will be lost.`)) {
+  if (!playground.site && !(await confirmAction(`Start a new playground with PHP ${version}? This one is not saved and will be lost.`, { confirmLabel: 'Start new playground' }))) {
     elements.php.value = playground.phpVersion;
 
     return;
@@ -476,13 +486,13 @@ function switchPhp() {
   location.href = url.href;
 }
 
-function switchJoomla() {
+async function switchJoomla() {
   const version = elements.joomla.value;
   const url = new URL(location.href);
 
   const bundle = bundles.versions.find((candidate) => candidate.joomla === version);
 
-  if (!confirm(`Start a new playground with Joomla ${bundleLabel(bundle)}? This one is not saved and will be lost.`)) {
+  if (!(await confirmAction(`Start a new playground with Joomla ${bundleLabel(bundle)}? This one is not saved and will be lost.`, { confirmLabel: 'Start new playground' }))) {
     elements.joomla.value = playground.manifest.joomla;
 
     return;
@@ -672,7 +682,7 @@ function joomlaForBranch(branch) {
   }
 
   const numbers = (version) => version.split('.').map(Number);
-  const newestFirst = [...bundles.versions].sort((a, b) => {
+  const newestFirst = bundles.versions.toSorted((a, b) => {
     const [x, y] = [numbers(a.joomla), numbers(b.joomla)];
 
     return y[0] - x[0] || y[1] - x[1] || y[2] - x[2];
@@ -935,8 +945,8 @@ function setUpDivider() {
   });
 }
 
-function startOver() {
-  if (confirm('Throw this playground away and start again from the same link?')) {
+async function startOver() {
+  if (await confirmAction('Throw this playground away and start again from the same link?', { confirmLabel: 'Start over' })) {
     location.reload();
   }
 }
@@ -979,7 +989,7 @@ async function start() {
   elements.exportSite.onclick = () => exportSite();
   elements.importSite.onclick = () => elements.importFile.click();
   elements.importFile.onchange = () => elements.importFile.files[0] && importSite(elements.importFile.files[0]);
-  elements.sitesMenu.ontoggle = () => elements.sitesMenu.open && renderSites();
+  elements.sitesList.ontoggle = (event) => event.newState === 'open' && renderSites();
   elements.pullRequestToggle.onclick = togglePullRequest;
   elements.gitHubToken.onclick = openTokenDialog;
   elements.tokenForm.onsubmit = saveGitHubToken;
@@ -998,23 +1008,8 @@ async function start() {
   setUpAssistant();
 
   // Fallback for browsers without closedby="any" support (e.g. Safari).
-  if (!('closedBy' in HTMLDialogElement.prototype)) {
-    for (const dialog of [elements.mailDialog, elements.tokenDialog]) {
-      dialog.addEventListener('click', (event) => {
-        if (event.target !== dialog) {
-          return;
-        }
-
-        const rect = dialog.getBoundingClientRect();
-        const isDialogContent = rect.top <= event.clientY && event.clientY <= rect.top + rect.height
-          && rect.left <= event.clientX && event.clientX <= rect.left + rect.width;
-
-        if (!isDialogContent) {
-          dialog.close();
-        }
-      });
-    }
-  }
+  closeOnBackdropClick(elements.mailDialog);
+  closeOnBackdropClick(elements.tokenDialog);
 
   // A saved site writes its changes shortly after requests; when the tab is hidden or closed, write them now.
   const flush = () => playground?.site && call('flush').catch(() => {});

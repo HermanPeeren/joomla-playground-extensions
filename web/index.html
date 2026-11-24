@@ -17,45 +17,27 @@
   <link rel="preload" href="./joomla/versions.json" as="fetch" crossorigin fetchpriority="high">
   <link rel="modulepreload" href="./joomla/joomla-core-loader.js">
   <style>
+    /* Dark mode follows the browser, as Joomla's administrator does (the site's front end, Cassiopeia, has none). */
     :root {
       --bar: #1c2b4a;
       --bar-text: #f2f5fa;
       --muted: #b9c4d8;
       --accent: #f9a541;
       --error: #ff8a80;
-      --page: #ffffff;
-      --text: #1a1a1a;
-      --text-muted: #666666;
-      --link: #1a5fb4;
-      --link-border: #a7bfdc;
-      --danger: #a51d2d;
-      --danger-border: #c6a0a6;
-      --line: #dddddd;
-      --line-light: #eeeeee;
-      --selected: #e8f0fb;
-      --added: #1a7f37;
-      --loading: #f2f5fa;
-      --loading-text: #1c2b4a;
+      --page: light-dark(#ffffff, #1b2335);
+      --text: light-dark(#1a1a1a, #e6ebf4);
+      --text-muted: light-dark(#666666, #9aa6bb);
+      --link: light-dark(#1a5fb4, #8db8f0);
+      --link-border: light-dark(#a7bfdc, #46628a);
+      --danger: light-dark(#a51d2d, #ff8a80);
+      --danger-border: light-dark(#c6a0a6, #7a4a4f);
+      --line: light-dark(#dddddd, #2c3750);
+      --line-light: light-dark(#eeeeee, #253047);
+      --selected: light-dark(#e8f0fb, #263552);
+      --added: light-dark(#1a7f37, #57c27a);
+      --loading: light-dark(#f2f5fa, #0f151d);
+      --loading-text: light-dark(#1c2b4a, #e6ebf4);
       color-scheme: light dark;
-    }
-
-    /* Dark mode follows the browser, as Joomla's administrator does (the site's front end, Cassiopeia, has none). */
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --page: #1b2335;
-        --text: #e6ebf4;
-        --text-muted: #9aa6bb;
-        --link: #8db8f0;
-        --link-border: #46628a;
-        --danger: #ff8a80;
-        --danger-border: #7a4a4f;
-        --line: #2c3750;
-        --line-light: #253047;
-        --selected: #263552;
-        --added: #57c27a;
-        --loading: #0f151d;
-        --loading-text: #e6ebf4;
-      }
     }
 
     * { box-sizing: border-box; }
@@ -95,7 +77,7 @@
       font-size: 0.875rem;
     }
 
-    header :where(a:any-link, button, select, summary):focus-visible {
+    header :where(a:any-link, button, select):focus-visible {
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
@@ -223,31 +205,16 @@
       opacity: 0.4;
     }
 
-    #sites-menu { position: relative; }
+    #sites-menu { anchor-name: --sites-menu; }
 
-    #sites-menu summary {
-      min-block-size: 26px;
-      padding: 4px 10px;
-      border: 1px solid var(--muted);
-      border-radius: 4px;
-      cursor: pointer;
-      list-style: none;
-    }
-
-    #sites-menu summary::-webkit-details-marker { display: none; }
-    #sites-menu summary::after {
+    #sites-menu::after {
       content: " ▾";
       content: " ▾" / "";
     }
 
     #sites-list {
-      position: absolute;
-      z-index: 10;
-      inset-block-start: calc(100% + 6px);
-      inset-inline-start: 0;
       min-inline-size: min(320px, calc(100dvw - 32px));
       max-inline-size: calc(100dvw - 32px);
-      margin: 0;
       padding: 6px 0;
       list-style: none;
       background: var(--page);
@@ -255,6 +222,18 @@
       border: 1px solid var(--line);
       border-radius: 6px;
       box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Below its button where the browser can anchor it, flipped to stay in view; elsewhere the popover stays centred. */
+    @supports (position-area: block-end) {
+      #sites-list {
+        position-anchor: --sites-menu;
+        position-area: block-end span-inline-end;
+        position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+        inset: auto;
+        margin: 0;
+        margin-block-start: 6px;
+      }
     }
 
     #sites-list li {
@@ -284,9 +263,7 @@
       font-weight: 600;
     }
 
-    #mail-dialog {
-      inline-size: min(1000px, calc(100% - 32px));
-      block-size: min(700px, calc(100dvh - 64px));
+    dialog {
       padding: 0;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -295,8 +272,14 @@
       background: var(--page);
     }
 
+    dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
+
+    #mail-dialog {
+      inline-size: min(1000px, calc(100% - 32px));
+      block-size: min(700px, calc(100dvh - 64px));
+    }
+
     #mail-dialog[open] { display: grid; grid-template-rows: auto 1fr; }
-    #mail-dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
 
     #mail-dialog header { flex-direction: row; align-items: center; justify-content: space-between; }
     #mail-dialog .body { display: grid; grid-template-columns: minmax(200px, 1fr) 2fr; min-block-size: 0; }
@@ -347,26 +330,16 @@
       #mail-list { border-inline-end: 0; border-block-end: 1px solid var(--line); }
     }
 
-    #token-dialog {
-      inline-size: min(560px, calc(100% - 32px));
-      padding: 0;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
-      color: var(--text);
-      background: var(--page);
-    }
-
-    #token-dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
+    #token-dialog { inline-size: min(560px, calc(100% - 32px)); }
     #token-dialog header { flex-direction: row; align-items: center; justify-content: space-between; }
     #token-dialog .body { display: grid; gap: 12px; padding: 16px; }
     #token-dialog p { margin: 0; line-height: 1.5; }
     #token-dialog a { color: var(--link); }
     #token-dialog input { inline-size: 100%; padding: 6px 8px; font: 0.8125rem ui-monospace, Consolas, monospace; }
     #token-dialog :where(a:any-link, input, .actions button):focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
-    #token-dialog .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+    :is(#token-dialog, #ask-dialog) .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
 
-    #token-dialog .actions button {
+    :is(#token-dialog, #ask-dialog) .actions button {
       min-block-size: 28px;
       padding: 4px 12px;
       border: 1px solid var(--link-border);
@@ -382,12 +355,64 @@
     #token-state { color: var(--text-muted); font-size: 0.8125rem; }
     #token-error { color: var(--danger); font-size: 0.8125rem; }
 
+    /* The page's own questions and messages (dialogs.js). */
+    #ask-dialog { inline-size: min(440px, calc(100% - 32px)); }
+    #ask-dialog .body { display: grid; gap: 12px; padding: 16px; }
+    #ask-message { margin: 0; line-height: 1.5; overflow-wrap: anywhere; }
+    #ask-input { inline-size: 100%; padding: 6px 8px; font: inherit; }
+    #ask-dialog :where(input, button):focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+    #ask-dialog #ask-confirm { color: var(--bar-text); background: var(--link); border-color: var(--link); }
+    #ask-dialog #ask-confirm.danger { background: var(--danger); border-color: var(--danger); }
+
+    @media (prefers-color-scheme: dark) {
+      #ask-dialog #ask-confirm { color: var(--page); }
+    }
+
+    /* Dialogs and popovers fade and grow in, and back out; on close, overlay and display keep them in the top
+       layer until the transition ends. */
+    @media (prefers-reduced-motion: no-preference) {
+      dialog,
+      [popover] {
+        opacity: 0;
+        scale: 0.96;
+        transition-property: opacity, scale, overlay, display;
+        transition-duration: 0.15s;
+        transition-timing-function: ease-out;
+        transition-behavior: allow-discrete;
+      }
+
+      dialog[open],
+      [popover]:popover-open {
+        opacity: 1;
+        scale: 1;
+      }
+
+      dialog::backdrop {
+        opacity: 0;
+        transition-property: opacity, overlay, display;
+        transition-duration: 0.15s;
+        transition-behavior: allow-discrete;
+      }
+
+      dialog[open]::backdrop { opacity: 1; }
+
+      @starting-style {
+        dialog[open],
+        [popover]:popover-open {
+          opacity: 0;
+          scale: 0.96;
+        }
+
+        dialog[open]::backdrop { opacity: 0; }
+      }
+    }
+
     @media (pointer: coarse) {
       header button,
-      #sites-menu summary,
       .version select,
       #sites-list button,
       #token-dialog .actions button,
+      #ask-dialog .actions button,
       #mail-list button {
         min-block-size: 44px;
       }
@@ -596,10 +621,8 @@
       <button id="export-site" type="button" disabled title="Download the whole site as a zip">Export</button>
       <button id="import-site" type="button" disabled title="Start a playground from an exported zip">Import…</button>
       <input id="import-file" type="file" accept=".zip,application/zip" hidden>
-      <details id="sites-menu">
-        <summary>My sites</summary>
-        <ul id="sites-list"></ul>
-      </details>
+      <button id="sites-menu" type="button" popovertarget="sites-list">My sites</button>
+      <ul id="sites-list" popover="auto"></ul>
       <button id="mail" type="button" disabled title="The mails this site sent: they are caught, not delivered">Mail <span id="mail-count"></span></button>
       <button id="code" type="button" disabled aria-pressed="false" title="Edit the site's files beside the page: save, and the page shows the result">Code</button>
       <button id="assistant" type="button" hidden></button>
@@ -667,6 +690,16 @@
       <div class="actions">
         <button id="token-forget" type="button">Forget</button>
         <button id="token-save" type="submit" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+  <dialog id="ask-dialog" closedby="any" aria-labelledby="ask-message">
+    <form class="body" method="dialog">
+      <p id="ask-message"></p>
+      <input id="ask-input" type="text" autocomplete="off" aria-labelledby="ask-message" hidden>
+      <div class="actions">
+        <button id="ask-cancel" type="button">Cancel</button>
+        <button id="ask-confirm" type="submit" value="confirm">OK</button>
       </div>
     </form>
   </dialog>
