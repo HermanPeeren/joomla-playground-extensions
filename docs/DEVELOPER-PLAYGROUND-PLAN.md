@@ -139,9 +139,18 @@ tutorial, before the VS Code workbench. It uses the same site API, so the workbe
   overwriting. After saving, the frame reloads its page (as a GET).
 - **Tested:** in Chrome, a change to step 5's template shows after Ctrl+S, and a syntax error is not saved
   (`tests/browser/playground.test.mjs`). A changed view class showed at once; the reload took about 0.2 s.
-- **Not yet:** a diff with the previous tutorial step, "reset to this step" and "show the solution", a Reinstall
-  button for manifest and SQL changes, keeping unsaved edits of a temporary playground across a reload, a timeout
-  for code that does not end, completion and go to definition.
+- **Tutorial mode** (23 November, evening, branch `feature/tutorial-step-diff`): with a blueprint's
+  `code.changes`, the panel lists the files a tutorial step changed and shows the changes in the editor
+  (`@codemirror/merge`); the packages are read in the browser (`web/src/zip-reader.js`, the browser's own
+  deflate). **Install again** packs the component from the site the way its manifest says the installer placed it
+  and installs that with Joomla's console; **Reset to step** installs the step's package again; links lead to the
+  step before and after.
+- **Code that never ends:** PHP in the browser has no time limit (`max_execution_time` is 0, `set_time_limit()`
+  does nothing), so an endless loop keeps the site busy until the page is reloaded. The panel says so 15 s after a
+  save. Restarting PHP and putting the saved files back is possible, but a decision.
+- **Not yet:** "show the solution" (the next step's version of a file), keeping unsaved edits of a temporary
+  playground across a reload, a fresh install that also empties the component's tables, completion and go to
+  definition.
 
 ## 4. Safer and exact links
 

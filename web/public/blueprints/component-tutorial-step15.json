@@ -8,6 +8,27 @@
     "joomla": "6.2"
   },
   "landingPage": "/administrator/index.php?option=com_example&view=landmarks",
+  "code": {
+    "changes": {
+      "label": "Changed in step 15, since step 14",
+      "previous": {
+        "href": "?blueprint=component-tutorial-step14&code",
+        "label": "← Step 14"
+      },
+      "next": {
+        "href": "?blueprint=component-tutorial-step16&code",
+        "label": "Step 16 →"
+      },
+      "from": "assets/component-tutorial/com_example_step14.zip",
+      "to": "assets/component-tutorial/com_example_step15.zip",
+      "paths": {
+        "example.xml": "administrator/components/com_example/example.xml",
+        "script.php": "administrator/components/com_example/script.php",
+        "components/com_example/language/": "language/",
+        "administrator/components/com_example/language/": "administrator/language/"
+      }
+    }
+  },
   "steps": [
     {
       "step": "installExtension",

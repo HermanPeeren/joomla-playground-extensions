@@ -85,6 +85,8 @@ const pending = new Map();
 /** The code panel (code-panel.js), once it was opened; codeRequested: the ?code file to open when ready. */
 let codePanel = null;
 let codeRequested = new URL(location.href).searchParams.get('code');
+/** The blueprint's "code": { "changes" }, with absolute URLs: the packages the code panel compares. */
+let codeChanges = null;
 /** The connection to an AI assistant, if any (see setUpAssistant()). */
 let assistant = null;
 let nextId = 1;
@@ -869,6 +871,7 @@ async function toggleCode(show = elements.codePanel.hidden, path = '') {
         site: (operation, args) => call('site', { operation, args }),
         reloadFrame,
         onClose: () => toggleCode(false),
+        changes: codeChanges,
       });
       setUpDivider();
     } finally {
@@ -885,8 +888,13 @@ async function toggleCode(show = elements.codePanel.hidden, path = '') {
   }
 }
 
-/** Shows the frame's page again (a GET, so a form is not sent twice), e.g. after a file was saved. */
+/**
+ * Shows the frame's page again (a GET, so a form is not sent twice), e.g. after a file was saved. Resolves when the
+ * page has loaded.
+ */
 function reloadFrame() {
+  const loaded = new Promise((resolve) => elements.frame.addEventListener('load', resolve, { once: true }));
+
   try {
     const page = elements.frame.contentWindow.location.href;
 
@@ -894,6 +902,8 @@ function reloadFrame() {
   } catch {
     elements.frame.src = elements.frame.src;
   }
+
+  return loaded;
 }
 
 /** The divider between the code panel and the frame: drag it, or use the arrow keys. */
@@ -1014,6 +1024,19 @@ async function start() {
 
   const site = url.searchParams.get('site');
   const blueprint = await blueprintFromUrl(url);
+
+  if (blueprint?.code?.changes) {
+    const { from, to } = blueprint.code.changes;
+
+    codeChanges = { ...blueprint.code.changes, from: from && new URL(from, blueprint.baseUrl ?? location.href).href, to: new URL(to, blueprint.baseUrl ?? location.href).href };
+
+    // Links to other steps are relative to the playground's page, like a link in the address bar.
+    for (const key of ['previous', 'next']) {
+      const link = blueprint.code.changes[key];
+
+      codeChanges[key] = link && { ...link, href: new URL(link.href, location.href).href };
+    }
+  }
   const prebuilt = site ? null : await prebuiltDemo(blueprint, url);
 
   if (prebuilt) {
