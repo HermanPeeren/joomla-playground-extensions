@@ -5,10 +5,6 @@ on:
     branches: [main]
   pull_request:
 
-env:
-  # Joomla release the integration tests install; keep in line with phpunit.xml.dist
-  JOOMLA_VERSION: 6.2.0
-
 jobs:
   tests:
     name: PHP ${{ matrix.php }}, ${{ matrix.driver }}, ${{ matrix.runtime }}
@@ -33,6 +29,11 @@ jobs:
           php-version: ${{ matrix.php }}
           extensions: pdo_sqlite, sqlite3, curl, zip, gd, intl, mbstring
           coverage: none
+
+      # The integration tests install the default of joomla-versions.json. It is not written here: the Joomla
+      # versions workflow updates that file, and its token may not change workflow files.
+      - name: Joomla version
+        run: echo "JOOMLA_VERSION=$(jq -r .default joomla-versions.json)" >> "$GITHUB_ENV"
 
       - name: Cache the Joomla package
         uses: actions/cache@v4
@@ -96,9 +97,11 @@ jobs:
           npm run test:proxy
           npm run test:scripts
 
+      # developer.joomla.org now and then gives GitHub Actions a bot check instead of a nightly build: then the copy
+      # in the cache will do, and without one the tests go on without that development branch.
       - name: Build the Joomla bundle and the playground
         run: |
-          npm run bundle
+          npm run bundle -- --development-optional
           npm run web:build
 
       - name: Site API tests (PHP in WebAssembly in Node, on the bundle)
