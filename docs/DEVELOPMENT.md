@@ -59,19 +59,22 @@ Then open http://localhost:5400/.
   (`bin/build-browser-bundles.php`). It downloads Full Packages missing from `.cache/`, installs each, and packs
   it for the browser in `web/public/joomla/<version>/`. `web/public/joomla/versions.json` lists them.
   `--version=<version>` rebuilds one.
-- It also builds the nightly builds of Joomla's development branches (developer.joomla.org/nightly-builds.html):
+- It also builds the nightly builds of Joomla's development branches (as Joomla's update server lists them,
+  update.joomla.org/core/nightlies; developer.joomla.org/nightly-builds.html when it lists none):
   the next minor version after the default (6.3-dev), and the branch of each version in the list (6.2-dev,
   5.4-dev) when its nightly build is newer than the release. `--version=development` rebuilds those,
-  `--no-development` skips them.
+  `--no-development` skips them. When a nightly build cannot be downloaded, the copy in `.cache/` is used;
+  without one, `--development-optional` (used by CI) leaves that branch out instead of failing.
 - It also downloads the accredited language packs of each version into `joomla/<version>/languages/`
   (`bin/download-language-packs.php`, cached in `.cache/language-packs/`; about 32 MB per version). The
   playground's system plugin points Joomla's download of such a pack to that copy. `--no-languages` skips
   them, for a quicker local build.
-- To offer another Joomla version, add it to `joomla-versions.json`; `default` is the version a new playground
-  gets. The integration tests use `JOOMLA_VERSION` (`phpunit.xml.dist`, CI).
-- `npm run joomla:versions` (`scripts/update-joomla-versions.mjs`) moves every version in the list to the newest
-  stable release of its major version. The default becomes the release GitHub marks as Latest, and
-  `JOOMLA_VERSION` follows it; `-- --check` only reports.
+- `joomla-versions.json` lists the Joomla versions the playground offers; `default` is the version a new
+  playground gets. The integration tests and `bin/build-browser-bundle.php` install the default too, unless
+  `JOOMLA_VERSION` says another version.
+- `npm run joomla:versions` (`scripts/update-joomla-versions.mjs`) sets the two maintained major versions: the
+  default is the release GitHub marks as Latest, the other one the newest stable release of the major version
+  below it. It only changes `joomla-versions.json`; `-- --check` only reports.
 - The **Joomla versions** workflow (`.github/workflows/joomla-versions.yml`) runs it every day. On new releases it
   pushes a branch and opens a pull request (the repository allows it: Settings > Actions >
   General > "Allow GitHub Actions to create and approve pull requests"; without it, an issue with a
